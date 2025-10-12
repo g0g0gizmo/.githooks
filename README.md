@@ -4,13 +4,63 @@
 
 Git Hooks are scripts that run automatically every time a particular event occurs in a Git repository.
 
+## Quick Start
+
+### 🚀 One-Click Installation (Windows)
+
+Install everything (virtual environment, dependencies, and hooks) with a single command:
+
+**Batch Script:**
+```batch
+# Install in current repository
+install-all.bat
+
+# Install in specific repository
+install-all.bat "C:\path\to\your\repo"
+
+# Install globally for all repositories
+install-all.bat . global
+```
+
+**PowerShell Script:**
+```powershell
+# Install in current repository
+.\install-all.ps1
+
+# Install in specific repository
+.\install-all.ps1 -RepoPath "C:\path\to\your\repo"
+
+# Install globally for all repositories
+.\install-all.ps1 -Global
+```
+
+The installation script will:
+- ✅ Create a Python virtual environment
+- ✅ Install all required Python packages
+- ✅ Check for system dependencies (dotenvx, Maven, etc.)
+- ✅ Install selected git hooks
+- ✅ Create helper scripts for environment management
+
+### 🔧 Helper Scripts
+
+After installation, you'll have these helper scripts:
+
+- `activate-hooks-env.bat/.ps1` - Activate the Python environment
+- `check-dependencies.bat/.ps1` - Verify all dependencies are installed
+
 ## Contents
-- [Useful Git Hooks scripts](#useful-git-hooks-scripts)
-- [Tools](#tools)
-- [Projects](#projects)
-- [Articles](#articles)
-- [Video Tutorials](#video-tutorials)
-- [Support](#support)
+- [Awesome Git Hooks ](#awesome-git-hooks-)
+  - [Quick Start](#quick-start)
+    - [🚀 One-Click Installation (Windows)](#-one-click-installation-windows)
+    - [🔧 Helper Scripts](#-helper-scripts)
+  - [Contents](#contents)
+  - [Useful Git Hooks scripts](#useful-git-hooks-scripts)
+  - [Tools](#tools)
+  - [Projects](#projects)
+  - [Articles](#articles)
+  - [Video Tutorials](#video-tutorials)
+  - [Support](#support)
+  - [License](#license)
 
 ## Useful Git Hooks scripts
 

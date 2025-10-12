@@ -1,0 +1,10 @@
+#!/bin/sh
+# commit-msg hook to enforce Conventional Commits using commitlint
+# Requires commitlint installed globally or in project node_modules
+
+if command -v npx >/dev/null 2>&1; then
+  npx --no-install commitlint --edit "$1"
+else
+  echo "npx not found. Please install Node.js and npx."
+  exit 1
+fi
