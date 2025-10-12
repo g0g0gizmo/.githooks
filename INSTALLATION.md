@@ -29,12 +29,17 @@ Git hooks must be located in the `.git/hooks` directory of your repository to wo
 4. Rename it to match the exact hook name (remove any suffixes)
 5. On Unix systems, make it executable with `chmod +x hookname`
 
-For example, to install a pre-commit hook:
+
+### Modular pre-commit hooks (recommended)
+
+To use all pre-commit hooks in this collection, use the dispatcher:
+
 ```bash
 # From your Git repository root
-cp /path/to/.githooks/pre-commit/format-code.hook .git/hooks/pre-commit
+cp /path/to/.githooks/pre-commit/dispatcher.hook .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit  # On Unix systems
 ```
+This will run every `*.hook` script in the `pre-commit` folder, in order. Add or remove `.hook` scripts to customize your workflow.
 
 ## Dependencies for Conventional Commit Hooks
 
@@ -59,6 +64,12 @@ module.exports = { extends: ['@commitlint/config-conventional'] };
 ```
 
 For more info, see https://commitlint.js.org/ and https://github.com/conventional-changelog/standard-version
+
+
+## Awesome hooks and features
+
+- **pre-commit/prevent-commit-to-main-or-develop.hook**: Prevents direct commits to `main` or `develop` branches. Enforces feature branch workflow.
+- **prepare-commit-msg/classify-commit-type-by-diff.hook**: Analyzes staged changes and auto-suggests commit type (`docs:`, `test:`) if only docs or tests are changed.
 
 ## Available hooks in this collection
 
