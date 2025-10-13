@@ -49,19 +49,19 @@ if !errorlevel! neq 0 (
     exit /b 1
 )
 
-REM Create virtual environment if it doesn't exist
-if not exist "%VENV_DIR%" (
-    echo [INFO] Creating Python virtual environment...
-    python -m venv ".%VENV_DIR%"
-    if !errorlevel! neq 0 (
-        echo [ERROR] Failed to create virtual environment
-        pause
-        exit /b 1
-    )
-    echo [SUCCESS] Virtual environment created
-) else (
-    echo [INFO] Virtual environment already exists
+REM Always recreate virtual environment
+if exist "%VENV_DIR%" (
+    echo [INFO] Removing existing Python virtual environment...
+    rmdir /s /q "%VENV_DIR%"
 )
+echo [INFO] Creating Python virtual environment...
+python -m venv "%VENV_DIR%"
+if !errorlevel! neq 0 (
+    echo [ERROR] Failed to create virtual environment
+    pause
+    exit /b 1
+)
+echo [SUCCESS] Virtual environment created
 
 REM Activate virtual environment
 echo [INFO] Activating virtual environment...
@@ -87,6 +87,17 @@ if exist "%REQUIREMENTS_FILE%" (
 echo.
 echo Step 2: Checking System Dependencies
 echo ====================================
+REM Detect platform (Git Bash, PowerShell, or CMD)
+set "PLATFORM=cmd"
+ver | findstr /i "Microsoft" >nul 2>&1 && (
+    set "PLATFORM=cmd"
+)
+where bash >nul 2>&1 && (
+    bash -c "echo $0" 2>nul | findstr /i "bash" >nul 2>&1 && set "PLATFORM=gitbash"
+)
+where pwsh >nul 2>&1 && (
+    set "PLATFORM=powershell"
+)
 
 REM Check for dotenvx
 dotenvx --version >nul 2>&1
@@ -94,8 +105,17 @@ if !errorlevel! equ 0 (
     echo [SUCCESS] dotenvx is available
 ) else (
     echo [WARNING] dotenvx not found
-    echo           Install from: https://dotenvx.com/docs/install
-    echo           Quick install: curl -sfS https://dotenvx.sh | sh
+    echo           Please install dotenvx manually for your shell:
+    if /i "%PLATFORM%"=="gitbash" (
+        echo           - For Git Bash: curl -sfS https://dotenvx.sh ^| sh
+    ) else (
+        if /i "%PLATFORM%"=="powershell" (
+            echo           - For PowerShell: irm https://dotenvx.sh ^| iex
+        ) else (
+            echo           - For CMD: Use PowerShell or Git Bash to install dotenvx
+        )
+    )
+    echo           See: https://dotenvx.com/docs/install
 )
 
 REM Check for Maven
@@ -104,8 +124,17 @@ if !errorlevel! equ 0 (
     echo [SUCCESS] Maven is available
 ) else (
     echo [WARNING] Maven not found
-    echo           Some hooks may not work without Maven
-    echo           Install from: https://maven.apache.org/install.html
+    echo           Please install Maven manually:
+    if /i "%PLATFORM%"=="gitbash" (
+        echo           - For Git Bash: Use SDKMAN or download from https://maven.apache.org/install.html
+    ) else (
+        if /i "%PLATFORM%"=="powershell" (
+            echo           - For PowerShell: choco install maven -y
+        ) else (
+            echo           - For CMD: Download from https://maven.apache.org/install.html or use Chocolatey
+        )
+    )
+    echo           See: https://maven.apache.org/install.html
 )
 
 REM Check for Git
@@ -114,6 +143,8 @@ if !errorlevel! equ 0 (
     echo [SUCCESS] Git is available
 ) else (
     echo [ERROR] Git is not installed or not in PATH
+    echo           Please install Git manually:
+    echo           - Download: https://git-scm.com/download/win
     pause
     exit /b 1
 )
@@ -274,10 +305,12 @@ echo [INFO] Available hook types:
 set /a count=0
 for /d %%i in ("%SCRIPT_DIR%*") do (
     if exist "%%i\README.md" (
-        set /a count+=1
         set "hookname=%%~ni"
-        echo   !count!. !hookname!
-        set "hooktype!count!=!hookname!"
+        if not "!hookname!"=="" (
+            set /a count+=1
+            echo   !count!. !hookname!
+            set "hooktype!count!=!hookname!"
+        )
     )
 )
 
@@ -308,26 +341,32 @@ set "source_dir=%~1"
 set "hooktype=%~n1"
 
 echo [INFO] Installing %hooktype% hooks...
-for %%j in ("%source_dir%\*.hook") do (
-    set "hookfile=%%~nj"
-    set "hookname=!hookfile:.hook=!"
-    
-    REM Update shebang to use virtual environment for Python scripts
-    findstr /m "#!/usr/bin/env python\|#!/bin/python" "%%j" >nul 2>&1
-    if !errorlevel! equ 0 (
-        REM This is a Python script, update shebang
-        (
-            echo #!%VENV_DIR%\Scripts\python.exe
-            more +1 "%%j"
-        ) > "%HOOKS_DIR%\%hooktype%"
-        echo [SUCCESS] Installed %hooktype%/!hookname! (updated for venv)
-    ) else (
-        copy "%%j" "%HOOKS_DIR%\%hooktype%" >nul 2>&1
-        if !errorlevel! equ 0 (
-            echo [SUCCESS] Installed %hooktype%/!hookname!
-        )
-    )
-)
+REM Generate a Python aggregator to run all .hook scripts in this hooktype directory
+(
+    echo import sys, subprocess, os, glob
+    echo hook_dir = r"%source_dir%"
+    echo exit_code = 0
+    echo for path in sorted(glob.glob(os.path.join(hook_dir, "*.hook"))):
+    echo ^    print(f"[dispatcher] Running {path}...")
+    echo ^    r = subprocess.run([sys.executable, path] + sys.argv[1:])
+    echo ^    if r.returncode != 0:
+    echo ^        sys.exit(r.returncode)
+    echo sys.exit(0)
+) > "%HOOKS_DIR%\%hooktype%.py"
+
+REM Create a .bat shim so Git on Windows can execute the aggregator reliably
+(
+    echo @echo off
+    echo "%VENV_DIR%\Scripts\python.exe" "%HOOKS_DIR%\%hooktype%.py" %%*
+) > "%HOOKS_DIR%\%hooktype%.bat"
+
+REM Also create the bare hook file (no extension) to call the .bat for compatibility
+(
+    echo @echo off
+    echo call "%HOOKS_DIR%\%hooktype%.bat" %%*
+) > "%HOOKS_DIR%\%hooktype%"
+
+echo [SUCCESS] Installed aggregator for %hooktype%
 goto :eof
 
 REM ==============================================================================

@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import sys, subprocess
+from hook_utils import print_error
+
+MAX_KB = 500  # adjust policy
+
+def main():
+    # Only check added files (A) in the index
+    res = subprocess.run(['git','diff','--cached','--name-only','--diff-filter=A'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f]
+    too_big=[]
+    for f in files:
+        try:
+            st = subprocess.run(['git','ls-files','-s',f], capture_output=True, text=True)
+            # Use filesystem size; index size not easily available here
+            import os
+            sz = os.path.getsize(f) / 1024.0
+            if sz > MAX_KB:
+                too_big.append((f,int(sz)))
+        except Exception:
+            continue
+    if too_big:
+        lines = [f"{p} ({kb} KB) > {MAX_KB} KB" for p,kb in too_big]
+        print_error("Large files detected (consider Git LFS):\n  - " + "\n  - ".join(lines))
+        return 1
+    return 0
+
+if __name__=='__main__':
+    sys.exit(main())

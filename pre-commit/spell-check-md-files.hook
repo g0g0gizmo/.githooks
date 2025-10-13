@@ -1,47 +1,54 @@
-#!/usr/bin/env bash
-# Based on a hook from tygertec.com
-# Source: https://cloudrkt.com/spellcheck-hook.html
-#
-# Used to check files with the .md extension (markdown) for spelling errors.
-# It will run each .md file through aspell and returns an exit code other than 0 when it matches.
-#
-# Requirements: 
-#   * Bash
-#
-# To enable this hook, rename this file to "pre-commit".
 
-# Where are the markdown files located?
-SEARCH_DIR="content"
+"""
+Spell check .md files using aspell. If aspell is not installed, print error and exit.
+"""
+"""
+Spell check .md files using aspell. If aspell is not installed, print error and exit.
+"""
+import subprocess
+import sys
+import os
 
-# Set some fancy colors to indicate errors and wrongly spelled words.
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
+SEARCH_DIR = "content"
+RED = '\033[0;31m'
+YELLOW = '\033[0;33m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
 
-# Start checking the current directory for md files
-for file in $(find $SEARCH_DIR -type f -name "*.md");
-        # Pass each .md file through aspell.
-        do output=$(cat $file | aspell --lang=en list);
-        if [[ $? != 0 ]]; then
-                echo -e "${RED}Error found in output${NC}, cannot continue." 
-                echo -e "Please check manually for aspell -c $file?"
-                exit 1
-        elif [[ $output ]]; then
-                echo -e "-> ${RED}Spelling errors found${NC} <-"
-                echo -e "${YELLOW}$output${NC}" |sort -u
-                echo "Please check with: aspell -c $file"
-                bad="yes"
-                good="yes"
-        fi
-done
+def tool_exists(tool):
+    from shutil import which
+    return which(tool) is not None
 
-# Matched in aspell
-if [[ "$bad" == "yes" ]]; then
-        exit 1
-fi
+def main():
+    if not tool_exists("aspell"):
+        print(f"{YELLOW}[spell-check-md-files] aspell not installed. Please install aspell to enable spell checking.{NC}", file=sys.stderr)
+        sys.exit(0)
+    if not os.path.isdir(SEARCH_DIR):
+        print(f"{YELLOW}[spell-check-md-files] Directory '{SEARCH_DIR}' does not exist. Skipping.{NC}", file=sys.stderr)
+        sys.exit(0)
+    bad = False
+    for root, _, files in os.walk(SEARCH_DIR):
+        for file in files:
+            if file.endswith(".md"):
+                path = os.path.join(root, file)
+                with open(path, "r", encoding="utf-8") as f:
+                    try:
+                        output = subprocess.run(["aspell", "--lang=en", "list"], input=f.read(), capture_output=True, text=True)
+                    except Exception as e:
+                        print(f"{RED}Error running aspell on {path}: {e}{NC}", file=sys.stderr)
+                        sys.exit(1)
+                if output.returncode != 0:
+                    print(f"{RED}Error found in output, cannot continue. Please check manually for aspell -c {path}?{NC}", file=sys.stderr)
+                    sys.exit(1)
+                if output.stdout.strip():
+                    print(f"{YELLOW}-> Spelling errors found <-{NC}", file=sys.stderr)
+                    print(f"{YELLOW}{output.stdout}{NC}", file=sys.stderr)
+                    print(f"{YELLOW}Please check with: aspell -c {path}{NC}", file=sys.stderr)
+                    bad = True
+    if bad:
+        sys.exit(1)
+    print(f"{GREEN}[spell-check-md-files] All markdown files passed spell check.{NC}")
+    sys.exit(0)
 
-# No match in aspell
-if [[ "$good" == "yes" ]]; then
-        echo -e "Spelling check is ${RED}OK${NC}, good to go."
-        exit 0
-fi
+if __name__ == "__main__":
+    main()

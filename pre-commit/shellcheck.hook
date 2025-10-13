@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+import sys, subprocess, os
+from hook_utils import print_error
+
+def is_shell_file(path):
+    # heuristic: .sh, .bash, or shebang line
+    low = path.lower()
+    if low.endswith(('.sh','.bash')):
+        return True
+    try:
+        with open(path,'rb') as bf:
+            head = bf.read(128)
+        return head.startswith(b'#!') and b'sh' in head
+    except Exception:
+        return False
+
+def main():
+    # Ensure shellcheck from shellcheck-py is available
+    try:
+        from shellcheck_lib import shellcheck  # type: ignore
+    except Exception:
+        # Fallback to shellcheck on PATH
+        if not (os.environ.get('SHELLCHECK') or subprocess.run(['shellcheck','--version'], capture_output=True).returncode==0):
+            print_error('shellcheck: not installed. Install shellcheck-py in this environment.')
+            return 1
+    res = subprocess.run(['git','diff','--cached','--name-only'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f]
+    targets = [f for f in files if is_shell_file(f)]
+    if not targets:
+        return 0
+    failed = False
+    for f in targets:
+        r = subprocess.run(['python','-m','shellcheck_lib.shellcheck', f], capture_output=True, text=True)
+        if r.returncode != 0:
+            failed = True
+            print_error(f"shellcheck: {f}\n{(r.stdout or r.stderr).strip()}")
+    return 1 if failed else 0
+
+if __name__=='__main__':
+    sys.exit(main())

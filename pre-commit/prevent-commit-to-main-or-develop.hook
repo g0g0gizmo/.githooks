@@ -1,7 +1,42 @@
-#!/bin/sh
-# Prevent commits to main or develop branches
-branch=$(git rev-parse --abbrev-ref HEAD)
-if [ "$branch" = "main" ] || [ "$branch" = "develop" ]; then
-  echo "\033[0;31mERROR: Direct commits to $branch are not allowed. Please use a feature branch.\033[0m"
-  exit 1
-fi
+import subprocess
+import sys
+
+
+def get_branch() -> str:
+    """Return the current git branch name.
+
+    On initial repos without commits, assume 'main' for safety.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return "main"
+
+
+def main() -> None:
+    branch = get_branch()
+    # Pre-commit runs before commit is finalized; block protected branches.
+    # Support environments where the default branch may be named 'master'.
+    if branch in ("main", "develop", "master"):
+        print(
+            f"[prevent-commit] WARNING: Direct commits to '{branch}' are not allowed.",
+            file=sys.stderr,
+        )
+        # Suggest a branch name (do not create or switch automatically)
+        suggested = "ISSUE-0000_description"
+        print("Please create a new branch to commit your changes.", file=sys.stderr)
+        print(f"Example: git checkout -b {suggested}", file=sys.stderr)
+        sys.exit(1)
+
+    # Allowed branch
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

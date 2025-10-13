@@ -1,0 +1,1 @@
+ISSUE-0000: allowed on branch with no JIRA ID

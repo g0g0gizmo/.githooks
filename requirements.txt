@@ -1,7 +1,6 @@
-# Git Hooks Dependencies
-# 
-# Python packages required for various git hooks in this repository
-# Install with: pip install -r requirements.txt
+
+# LEGACY: This file is auto-generated for compatibility. Use pyproject.toml and setup-venv.ps1/sh for modern setup.
+# To update: pip freeze > requirements.txt (after venv setup)
 
 # Core packages for hook functionality
 gitpython>=3.1.0      # For advanced git operations in Python hooks
@@ -21,6 +20,6 @@ isort>=5.10.0         # Python import sorting
 markdown>=3.3.0       # Markdown processing
 pygments>=2.10.0      # Syntax highlighting
 
-# Testing tools (if hooks need testing)
-pytest>=6.2.0        # Testing framework
+# Testing tools (for running the test suite)
+pytest>=6.2.0        # Testing framework (optional, you can use standard unittest)
 pytest-cov>=3.0.0    # Coverage reporting

@@ -41,6 +41,8 @@ class TestGitHooks(unittest.TestCase):
             f.write('test')
         run_git(['add', 'README.md'], self.tmpdir)
         run_git(['commit', '-m', 'init'], self.tmpdir)
+        # Ensure the repository uses 'main' as the current branch regardless of global config
+        run_git(['branch', '-M', 'main'], self.tmpdir)
 
     def tearDown(self):
         # shutil.rmtree can fail on Windows with PermissionError

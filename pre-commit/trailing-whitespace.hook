@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+import os, sys
+
+from hook_utils import print_error
+
+def main():
+    changed = False
+    # Get staged files from git
+    import subprocess
+    res = subprocess.run(['git','diff','--cached','--name-only'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f]
+    for f in files:
+        # Skip binary files
+        try:
+            with open(f, 'rb') as bf:
+                b = bf.read(8000)
+                if b"\0" in b:
+                    continue
+        except Exception:
+            continue
+        try:
+            with open(f, 'r', encoding='utf-8', errors='ignore') as fh:
+                lines = fh.readlines()
+            new = []
+            touched = False
+            for ln in lines:
+                nl = ln.rstrip('\r\n')
+                # remove trailing spaces/tabs
+                stripped = nl.rstrip(' \t')
+                # preserve original newline
+                end = ''
+                if ln.endswith('\r\n'):
+                    end = '\r\n'
+                elif ln.endswith('\n'):
+                    end = '\n'
+                new_ln = stripped + end
+                if new_ln != ln:
+                    touched = True
+                new.append(new_ln)
+            if touched:
+                with open(f, 'w', encoding='utf-8', errors='ignore') as fh:
+                    fh.writelines(new)
+                subprocess.run(['git','add',f])
+                changed = True
+        except Exception as e:
+            print_error(f"trailing-whitespace: failed on {f}: {e}")
+            return 1
+    if changed:
+        print("trailing-whitespace: fixed")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

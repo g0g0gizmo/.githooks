@@ -1,16 +1,38 @@
-#!/bin/sh
-# post-commit hook to auto-version using standard-version if commit is conventional
-# Requires standard-version installed globally or in project node_modules
+"""
+Python post-commit hook to auto-version using standard-version if commit is conventional.
+Requires standard-version installed globally or in project node_modules.
+"""
+import subprocess
+import sys
+import re
 
-# Get last commit message
-commit_msg=$(git log -1 --pretty=%B)
+RED = '\033[0;31m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
 
-# Check if commit message matches conventional commit (feat, fix, BREAKING CHANGE)
-if echo "$commit_msg" | grep -Eq '^(feat|fix)(\([^)]+\))?!?: |BREAKING CHANGE:'; then
-  if command -v npx >/dev/null 2>&1; then
-    npx --no-install standard-version --skip.tag --skip.changelog --skip.commit
-  else
-    echo "npx not found. Please install Node.js and npx."
-    exit 1
-  fi
-fi
+def tool_exists(tool):
+  from shutil import which
+  return which(tool) is not None
+
+def main():
+  # Get last commit message
+  result = subprocess.run(["git", "log", "-1", "--pretty=%B"], capture_output=True, text=True)
+  if result.returncode != 0:
+    print(f"{RED}[autoversion] git log failed{NC}", file=sys.stderr)
+    sys.exit(result.returncode)
+  commit_msg = result.stdout.strip()
+  # Check if commit message matches conventional commit
+  if re.match(r'^(feat|fix)(\([^)]+\))?!?: |BREAKING CHANGE:', commit_msg):
+    if tool_exists("npx"):
+      try:
+        subprocess.run(["npx", "--no-install", "standard-version", "--skip.tag", "--skip.changelog", "--skip.commit"], check=True)
+        print(f"{GREEN}[autoversion] Ran standard-version for conventional commit.{NC}")
+      except subprocess.CalledProcessError as e:
+        print(f"{RED}[autoversion] standard-version failed: {e}{NC}", file=sys.stderr)
+        sys.exit(e.returncode)
+    else:
+      print(f"{RED}npx not found. Please install Node.js and npx.{NC}", file=sys.stderr)
+      sys.exit(1)
+
+if __name__ == "__main__":
+  main()

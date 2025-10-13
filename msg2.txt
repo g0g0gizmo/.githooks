@@ -1,0 +1,1 @@
+PDF-123: should fail on branch with no JIRA ID

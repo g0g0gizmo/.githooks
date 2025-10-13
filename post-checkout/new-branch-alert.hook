@@ -1,44 +1,36 @@
-#!/bin/bash
-# Based on a hook from gist.github.com
-# Source: https://gist.github.com/zgohr/4557894
-#
-# Creates a commit and displays a custom message when a new branch is checked out for the first time.
-# A commit is made in order to help determine if a new branch has been created.
-#
-# Requirements:
-#   * Bash
-#
-# To enable this hook, rename this file to "post-checkout".
 
-from_hash=$1
-to_hash=$2
-checkout_type=$3
-branch_name=$(git rev-parse --abbrev-ref HEAD)
-from_branch_name=$(git name-rev --name-only $from_hash)
+"""
+Python post-checkout hook: displays a custom message when a new branch is checked out for the first time.
+"""
+import sys
+import subprocess
 
-light_red='\033[1;31m'
-no_color='\033[0m'
+LIGHT_RED = '\033[1;31m'
+NO_COLOR = '\033[0m'
 
-containsElement () {
-    local e
-    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
-    return 1
-}
+def main():
+    if len(sys.argv) < 4:
+        sys.exit(0)
+    from_hash = sys.argv[1]
+    to_hash = sys.argv[2]
+    checkout_type = sys.argv[3]
+    # Only act on branch checkouts
+    if checkout_type != "1":
+        sys.exit(0)
+    if from_hash != to_hash:
+        sys.exit(0)
+    # Get current branch name
+    try:
+        branch_name = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
+        from_branch_name = subprocess.check_output(["git", "name-rev", "--name-only", from_hash], text=True).strip()
+    except Exception:
+        sys.exit(0)
+    if branch_name == from_branch_name:
+        sys.exit(0)
+    print(f"{LIGHT_RED}New branch checked out: {branch_name}{NO_COLOR}")
 
-if [ $checkout_type -ne 1 ]
-then
-    exit 0 ; # Not a branch checkout
-fi
-
-if [ $from_hash != $to_hash ]
-then
-    exit 0 ; # Not checking out a new branch
-fi
-
-if [ $branch_name == $from_branch_name ]
-then
-    exit 0 ; # Not checking out a new branch
-fi
+if __name__ == "__main__":
+    main()
 
 # Create a commit and display a message
 git commit --allow-empty -m "Created branch $branch_name" --no-verify

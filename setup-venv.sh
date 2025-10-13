@@ -1,4 +1,25 @@
 #!/bin/bash
+VENV=".venv"
+if [ ! -d "$VENV" ]; then
+  python3 -m venv "$VENV"
+fi
+PIP="$VENV/bin/pip"
+if [ ! -x "$PIP" ]; then
+  PIP="$VENV/Scripts/pip.exe"
+fi
+if [ ! -x "$PIP" ]; then
+  echo "pip not found in venv." >&2
+  exit 1
+fi
+if [ -f requirements.txt ]; then
+  "$PIP" install -r requirements.txt
+elif [ -f pyproject.toml ]; then
+  "$PIP" install .
+else
+  echo "No requirements.txt or pyproject.toml found." >&2
+  exit 1
+fi
+echo "Venv ready at $VENV. Activate with: source $VENV/bin/activate"#!/bin/bash
 #
 # Git Hooks Virtual Environment Setup
 # 

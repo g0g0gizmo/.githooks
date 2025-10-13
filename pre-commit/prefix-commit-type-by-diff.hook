@@ -1,0 +1,66 @@
+"""
+Analyzes the staged diff and prepends a prefix (feat, fix, docs, test, chore) to the commit message file if not already present.
+This should be run as a pre-commit hook.
+"""
+import subprocess
+import sys
+import os
+import re
+
+def get_commit_msg_file():
+    # Try to find the commit message file in .git/COMMIT_EDITMSG
+    git_dir = subprocess.run(["git", "rev-parse", "--git-dir"], capture_output=True, text=True)
+    if git_dir.returncode != 0:
+        return None
+    commit_msg_path = os.path.join(git_dir.stdout.strip(), "COMMIT_EDITMSG")
+    if os.path.exists(commit_msg_path):
+        return commit_msg_path
+    return None
+
+def main():
+    commit_msg_file = get_commit_msg_file()
+    if not commit_msg_file:
+        sys.exit(0)
+    # Get staged files
+    files = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, text=True)
+    if files.returncode != 0:
+        sys.exit(0)
+    file_list = [f for f in files.stdout.splitlines() if f.strip()]
+    if not file_list:
+        sys.exit(0)
+
+    # Analyze file types and names
+    only_docs = all(f.endswith(".md") or f.startswith("docs/") for f in file_list)
+    only_tests = all(f.startswith("tests/") or ".test." in f or ".spec." in f for f in file_list)
+    has_feat = any(f.startswith("src/") or f.startswith("feature/") or f.startswith("features/") or f.endswith(".py") for f in file_list)
+    has_fix = any("fix" in f.lower() or "bug" in f.lower() or f.startswith("patch/") for f in file_list)
+
+    # If not clear from file names, check diff content for 'fix' or 'bug'
+    if not has_fix:
+        diff = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
+        if re.search(r"fix|bug", diff.stdout, re.IGNORECASE):
+            has_fix = True
+
+    prefix = None
+    if only_docs:
+        prefix = "docs: "
+    elif only_tests:
+        prefix = "test: "
+    elif has_fix:
+        prefix = "fix: "
+    elif has_feat:
+        prefix = "feat: "
+    else:
+        prefix = "chore: "
+
+    # Prepend prefix if not already present
+    with open(commit_msg_file, "r+", encoding="utf-8") as f:
+        content = f.read()
+        if not re.match(r"^(feat|fix|docs|test|chore)!?: ", content, re.IGNORECASE):
+            f.seek(0)
+            f.write(prefix + content)
+            f.truncate()
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

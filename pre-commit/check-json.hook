@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+import sys, subprocess, json
+from hook_utils import print_error
+
+def main():
+    res = subprocess.run(['git','diff','--cached','--name-only'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f and f.lower().endswith('.json')]
+    bad=[]
+    for f in files:
+        try:
+            with open(f,'r',encoding='utf-8') as fh:
+                json.load(fh)
+        except Exception as e:
+            bad.append((f,str(e)))
+    if bad:
+        print_error("Invalid JSON in:\n  - " + "\n  - ".join([f"{p}: {err}" for p,err in bad]))
+        return 1
+    return 0
+
+if __name__=='__main__':
+    sys.exit(main())

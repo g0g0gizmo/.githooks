@@ -1,15 +1,42 @@
-#!/bin/sh
-# Modular dispatcher: runs all .hook scripts in this directory, with diagnostics
-HOOK_DIR="$(dirname "$0")"
-EXIT_CODE=0
-for hook in "$HOOK_DIR"/*.hook; do
-  [ -x "$hook" ] || continue
-  echo "[dispatcher] Running $hook..."
-  "$hook"
-  code=$?
-  echo "[dispatcher] $hook exited with code $code"
-  if [ $code -ne 0 ]; then
-    EXIT_CODE=$code
-  fi
-done
-exit $EXIT_CODE
+
+
+"""
+Python 3 dispatcher: runs all .hook scripts in this directory as Python scripts, with diagnostics.
+Skips non-Python files (checks for .py or .hook extension and Python shebang or .py content).
+"""
+"""
+Python 3 dispatcher: runs all .hook scripts in this directory as Python scripts, with diagnostics.
+Skips non-Python files (checks for .py or .hook extension and Python shebang or .py content).
+"""
+import os
+import sys
+import subprocess
+
+def is_python_hook(path):
+    # Only run .hook files that are Python (by extension or shebang)
+    if not path.endswith('.hook'):
+        return False
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            first_line = f.readline()
+            if 'python' in first_line or path.endswith('.py'):
+                return True
+    except Exception:
+        return False
+    return False
+
+def main():
+    hook_dir = os.path.dirname(os.path.abspath(__file__))
+    exit_code = 0
+    for fname in sorted(os.listdir(hook_dir)):
+        hook_path = os.path.join(hook_dir, fname)
+        if is_python_hook(hook_path) and os.path.isfile(hook_path):
+            print(f"[dispatcher] Running {hook_path}...")
+            result = subprocess.run([sys.executable, hook_path], shell=False)
+            print(f"[dispatcher] {hook_path} exited with code {result.returncode}")
+            if result.returncode != 0:
+                exit_code = result.returncode
+    sys.exit(exit_code)
+
+if __name__ == "__main__":
+    main()

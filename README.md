@@ -54,6 +54,7 @@ After installation, you'll have these helper scripts:
     - [🚀 One-Click Installation (Windows)](#-one-click-installation-windows)
     - [🔧 Helper Scripts](#-helper-scripts)
   - [Contents](#contents)
+  - [All Checks Summary](#all-checks-summary)
   - [Useful Git Hooks scripts](#useful-git-hooks-scripts)
   - [Tools](#tools)
   - [Projects](#projects)
@@ -75,6 +76,10 @@ After installation, you'll have these helper scripts:
 - [post-receive](https://github.com/aitemr/awesome-git-hooks/tree/master/post-receive) - This is run on the remote when pushing after the all refs have been updated. It does not take parameters, but receives info through stdin in the form of `<old-value> <new-value> <ref-name>`. 
 - [post-rewrite](https://github.com/aitemr/awesome-git-hooks/tree/master/post-rewrite) - This is called when git commands are rewriting already committed data.
 - [post-commit](https://github.com/aitemr/awesome-git-hooks/tree/master/post-commit) - Called after a successful commit. Useful for triggering notifications, etc.
+
+## All Checks Summary
+
+For a complete, up-to-date list of everything the hooks enforce (what runs, when it runs, if it blocks, and dependencies), see ALL_CHECKS.md in this folder.
 
 ## Tools
 

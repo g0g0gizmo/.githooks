@@ -1,12 +1,41 @@
-#!/bin/bash
-#
-# Formats code using mvn fmt:format command.
-# Any staged files that are modified by this command will be re-added to the commit.
-#
-# Requirements: 
-#   * Bash
-#
-# To enable this hook, rename this file to "pre-commit".
 
-mvn fmt:format
-git diff --name-only --cached --diff-filter=d | xargs -l git add
+
+"""
+Formats code using mvn fmt:format and re-adds changed files to the commit.
+If mvn is not installed, print error and exit.
+"""
+import subprocess
+import sys
+
+RED = '\033[0;31m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
+
+def tool_exists(tool):
+	from shutil import which
+	return which(tool) is not None
+
+def main():
+	if not tool_exists("mvn"):
+		print(f"{RED}[format-code] mvn not installed. Please install Maven to enable formatting.{NC}", file=sys.stderr)
+		sys.exit(0)
+	# Run mvn fmt:format
+	result = subprocess.run(["mvn", "fmt:format"])
+	if result.returncode != 0:
+		print(f"{RED}[format-code] mvn fmt:format failed{NC}", file=sys.stderr)
+		sys.exit(result.returncode)
+	# Find changed files and re-add them
+	diff = subprocess.run(["git", "diff", "--name-only", "--cached", "--diff-filter=d"], capture_output=True, text=True)
+	if diff.returncode != 0:
+		print(f"{RED}[format-code] git diff failed{NC}", file=sys.stderr)
+		sys.exit(diff.returncode)
+	files = [f for f in diff.stdout.splitlines() if f.strip()]
+	for f in files:
+		add_result = subprocess.run(["git", "add", f])
+		if add_result.returncode != 0:
+			print(f"{RED}[format-code] git add failed for {f}{NC}", file=sys.stderr)
+			sys.exit(add_result.returncode)
+	print(f"{GREEN}[format-code] Formatting complete.{NC}")
+
+if __name__ == "__main__":
+	main()

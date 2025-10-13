@@ -1,33 +1,36 @@
-#!/bin/bash
-# Based on a hook from tygertec.com
-# Source: https://www.tygertec.com/git-hooks-practical-uses-windows/
-#
-# Verifies user.name and user.email are set to correct name and email address.
-#
-# The hook should exit with non-zero status after issuing an appropriate
-# message if it stops the commit.
-#
-# Requirements: 
-#   * Bash
-#
-# To enable this hook, rename this file to "pre-commit".
 
-# Make sure user.name is set properly
-username=$(git config user.name)
-if [ "$username" != "Lauren Stephenson" ]
-then
-    cat <<\EOF
-Error: user.name not set to "Lauren Stephenson"
-EOF
-    exit 1
-fi
 
-# Make sure user.email is set properly
-email=$(git config user.email)
-if [ "$email" != "compscilauren@gmail.com" ]
-then
-    cat <<\EOF
-Error: user.email not set to "compscilauren@gmail.com"
-EOF
-    exit 1
-fi
+
+"""
+Verifies user.name and user.email are set to correct values.
+"""
+import subprocess
+import sys
+
+EXPECTED_NAME = "Lauren Stephenson"
+EXPECTED_EMAIL = "compscilauren@gmail.com"
+
+RED = '\033[0;31m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
+
+def get_git_config(key):
+    result = subprocess.run(["git", "config", key], capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+def main():
+    username = get_git_config("user.name")
+    if username != EXPECTED_NAME:
+        print(f"{RED}Error: user.name not set to '{EXPECTED_NAME}'{NC}", file=sys.stderr)
+        sys.exit(1)
+    email = get_git_config("user.email")
+    if email != EXPECTED_EMAIL:
+        print(f"{RED}Error: user.email not set to '{EXPECTED_EMAIL}'{NC}", file=sys.stderr)
+        sys.exit(1)
+    print(f"{GREEN}[verify-name-and-email] user.name and user.email are correct.{NC}")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

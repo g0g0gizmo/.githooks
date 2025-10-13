@@ -1,32 +1,29 @@
-#!/bin/bash
-# Based on a hook from hackernoon.com
-# Source: https://hackernoon.com/automate-your-workflow-with-git-hooks-fef5d9b2a58c
-#
-# Verifies changes to be committed do not contain
-# any 'FIXME:' comments.
-#
-# The hook should exit with non-zero status after issuing an appropriate
-# message if it stops the commit.
-#
-# Requirements: 
-#   * Bash
-#
-# To enable this hook, rename this file to "pre-commit".
 
-# Redirect output to stderr
-exec 1>&2
+# Python 3: Verifies staged changes do not contain 'FIXME:' comments.
+import subprocess
+import sys
 
-# Define colors
-RED='\033[0;31m'
-NC='\033[0m'
+SEARCH_TERM = "FIXME:"
+RED = '\033[0;31m'
+NC = '\033[0m'
 
-# Define term to search for
-SEARCH_TERM="FIXME:"
+def main():
+	# Get staged diff
+	diff = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
+	if diff.returncode != 0:
+		print("[search-term] git diff failed", file=sys.stderr)
+		sys.exit(diff.returncode)
+	# Look for added lines with the search term
+	found = False
+	for line in diff.stdout.splitlines():
+		if line.startswith("+") and not line.startswith("+++ b/") and SEARCH_TERM in line:
+			found = True
+			break
+	if found:
+		print(f"{RED}Error:{NC} Found {SEARCH_TERM} in attempted commit.", file=sys.stderr)
+		print(f"Please remove all occurrences of {SEARCH_TERM} before committing.", file=sys.stderr)
+		sys.exit(1)
+	sys.exit(0)
 
-# Check for the presence of the SEARCH_TERM in updated files
-if [[ $(git diff --cached | grep -E "^\+" | grep -v '+++ b/' | cut -c 2-) == *$SEARCH_TERM* ]]
-then
-	printf "${RED}Error:${NC} Found ${SEARCH_TERM} in attempted commit.\n"
-	printf "Please remove all occurances of ${SEARCH_TERM} before committing.\n"
-	exit 1
-fi
+if __name__ == "__main__":
+	main()

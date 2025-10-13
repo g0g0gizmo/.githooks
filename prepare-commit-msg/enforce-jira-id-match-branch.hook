@@ -1,0 +1,49 @@
+
+import sys
+import re
+import subprocess
+
+def get_branch():
+    result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True)
+    return result.stdout.strip()
+
+
+def extract_jira_id(text):
+    # Only check the first line for a JIRA ID
+    first_line = text.splitlines()[0] if text else ""
+    match = re.search(r"([A-Z]+-[0-9]+)", first_line)
+    return match.group(1) if match else None
+
+def main():
+    if len(sys.argv) < 2:
+        sys.exit(0)
+    commit_msg_file = sys.argv[1]
+    branch = get_branch()
+    branch_jira_id = extract_jira_id(branch)
+
+    with open(commit_msg_file, 'r') as f:
+        commit_msg = f.read()
+    
+    commit_jira_id = extract_jira_id(commit_msg)
+
+    # Allow special "ISSUE-0000" on any branch
+    if commit_jira_id == "ISSUE-0000":
+        print("[enforce-jira] ISSUE-0000 is always allowed.")
+        sys.exit(0)
+
+    # If branch has a JIRA ID, the commit must have the same one
+    if branch_jira_id:
+        if commit_jira_id != branch_jira_id:
+            print(f"[enforce-jira] ERROR: Commit JIRA ID '{commit_jira_id}' does not match branch JIRA ID '{branch_jira_id}'.")
+            sys.exit(1)
+    # If branch does NOT have a JIRA ID, the commit should not have one either
+    else:
+        if commit_jira_id:
+            print(f"[enforce-jira] ERROR: JIRA ID '{commit_jira_id}' found in commit message on a non-JIRA branch '{branch}'.")
+            sys.exit(1)
+    
+    print("[enforce-jira] JIRA ID check passed.")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

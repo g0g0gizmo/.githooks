@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import sys, subprocess
+from hook_utils import print_error
+
+def main():
+    res = subprocess.run(['git','diff','--cached','--name-only'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f]
+    changed=False
+    for f in files:
+        try:
+            with open(f,'rb') as bf:
+                data = bf.read()
+            if b"\0" in data:
+                continue
+            # Normalize line endings: ensure file ends with single \n
+            text = data.decode('utf-8', errors='ignore')
+            # Strip trailing CR/LF then add \n
+            new = text.rstrip('\r\n') + '\n'
+            if new != text:
+                with open(f,'w',encoding='utf-8', errors='ignore') as fh:
+                    fh.write(new)
+                subprocess.run(['git','add',f])
+                changed=True
+        except Exception as e:
+            print_error(f"end-of-file-fixer: {f}: {e}")
+            return 1
+    if changed:
+        print('end-of-file-fixer: normalized EOFs')
+    return 0
+
+if __name__=='__main__':
+    sys.exit(main())

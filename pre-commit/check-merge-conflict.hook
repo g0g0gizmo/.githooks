@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import sys, subprocess
+from hook_utils import print_error
+
+CONFLICT_MARKERS = ("<<<<<<< ", "=======\n", ">>>>>>> ")
+
+def has_conflict_markers(path):
+    try:
+        with open(path, 'r', encoding='utf-8', errors='ignore') as fh:
+            data = fh.read()
+        return any(m in data for m in CONFLICT_MARKERS)
+    except Exception:
+        return False
+
+def main():
+    res = subprocess.run(['git','diff','--cached','--name-only'], capture_output=True, text=True)
+    files = [f for f in res.stdout.splitlines() if f]
+    bad=[]
+    for f in files:
+        try:
+            with open(f,'rb') as bf:
+                b = bf.read(8000)
+            if b"\0" in b:
+                continue
+        except Exception:
+            continue
+        if has_conflict_markers(f):
+            bad.append(f)
+    if bad:
+        print_error("Unresolved merge conflict markers found in:\n  - " + "\n  - ".join(bad))
+        return 1
+    return 0
+
+if __name__=='__main__':
+    sys.exit(main())

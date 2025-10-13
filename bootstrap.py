@@ -14,10 +14,11 @@ def main():
     venv_path = ".venv"
     if not venv_exists(venv_path):
         print("[bootstrap] venv not found, creating...")
+        repo_root = Path(__file__).parent
         if os.name == "nt":
-            subprocess.check_call(["powershell", "-ExecutionPolicy", "Bypass", "-File", "setup-venv.ps1"])
+            subprocess.check_call(["powershell", "-ExecutionPolicy", "Bypass", "-File", str(repo_root / "setup-venv.ps1")])
         else:
-            subprocess.check_call(["bash", "setup-venv.sh"])
+            subprocess.check_call(["bash", str(repo_root / "setup-venv.sh")])
     if not in_venv():
         # Re-invoke inside venv
         py = Path(venv_path) / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")

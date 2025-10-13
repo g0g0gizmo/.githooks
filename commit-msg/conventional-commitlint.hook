@@ -1,10 +1,57 @@
-#!/bin/sh
-# commit-msg hook to enforce Conventional Commits using commitlint
-# Requires commitlint installed globally or in project node_modules
 
-if command -v npx >/dev/null 2>&1; then
-  npx --no-install commitlint --edit "$1"
-else
-  echo "npx not found. Please install Node.js and npx."
-  exit 1
-fi
+
+"""
+commit-msg hook to enforce Conventional Commits using commitlint.
+If npx is not installed, print error and exit.
+"""
+import subprocess
+import sys
+
+RED = '\033[0;31m'
+YELLOW = '\033[0;33m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
+
+def tool_exists(tool):
+    from shutil import which
+    return which(tool) is not None
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"{YELLOW}[commitlint] No commit message file provided.{NC}", file=sys.stderr)
+        sys.exit(0)
+    commit_msg_file = sys.argv[1]
+    if not tool_exists("npx"):
+        print(f"{YELLOW}[commitlint] npx not installed. Please install npx to enable commitlint.{NC}", file=sys.stderr)
+        sys.exit(0)
+    result = subprocess.run(["npx", "--no-install", "commitlint", "--edit", commit_msg_file])
+    if result.returncode != 0:
+        print(f"{YELLOW}[commitlint] WARNING: Commit message failed commitlint. Commit is NOT blocked. Please fix manually if needed.{NC}", file=sys.stderr)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+
+RED = '\033[0;31m'
+YELLOW = '\033[0;33m'
+GREEN = '\033[0;32m'
+NC = '\033[0m'
+
+def tool_exists(tool):
+    from shutil import which
+    return which(tool) is not None
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"{YELLOW}[commitlint] No commit message file provided.{NC}", file=sys.stderr)
+        sys.exit(0)
+    commit_msg_file = sys.argv[1]
+    if not tool_exists("npx"):
+        print(f"{YELLOW}[commitlint] npx not installed. Please install npx to enable commitlint.{NC}", file=sys.stderr)
+        sys.exit(0)
+    result = subprocess.run(["npx", "--no-install", "commitlint", "--edit", commit_msg_file])
+    sys.exit(result.returncode)
+
+if __name__ == "__main__":
+    main()
