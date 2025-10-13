@@ -1,3 +1,31 @@
+## Automatic venv setup (bootstrap)
+
+You can use `bootstrap.py` to automatically create and activate the venv and install dependencies if missing. This can be called at the start of any hook or script:
+
+```sh
+python bootstrap.py
+```
+
+This will ensure `.venv` is present and all dependencies are installed, then re-invoke your script inside the venv.
+
+---
+
+## Windows popups (Node.js)
+
+To enable native Windows notifications from hooks, install Node.js and the `node-notifier` package:
+
+```sh
+npm install -g node-notifier
+```
+
+You can call `popup.js` from Python hooks like this:
+
+```python
+import subprocess
+subprocess.run(["node", "popup.js", "Title", "Message to show"])
+```
+
+---
 # Installing Git Hooks
 
 This directory contains a collection of useful Git hooks. Git hooks are scripts that run automatically when certain Git events occur (like committing, pushing, etc.).
@@ -5,6 +33,53 @@ This directory contains a collection of useful Git hooks. Git hooks are scripts 
 ## Why aren't my hooks being called?
 
 Git hooks must be located in the `.git/hooks` directory of your repository to work. This collection is a library of example hooks that need to be installed into your actual Git repositories.
+
+
+## Running the Test Suite
+
+This repo includes a Python-based test suite to verify the behavior of the hooks. To run the tests:
+
+1. Ensure you have Python 3 installed.
+2. From the repo root, run:
+
+```sh
+python -m unittest discover -s tests
+```
+
+Or, if you have pytest installed:
+
+```sh
+pytest tests
+```
+
+The tests will create temporary git repos and simulate commits to verify hook behavior (e.g., blocking commits to main, JIRA enforcement, etc.).
+
+---
+
+
+## Setting up the Python environment (recommended)
+
+This project uses a modern Python workflow with `pyproject.toml` and automated venv setup scripts.
+
+### 1. Create and activate a virtual environment
+
+#### On Windows (PowerShell):
+
+```powershell
+./setup-venv.ps1
+.\.venv\Scripts\Activate.ps1
+```
+
+#### On Unix/macOS (bash):
+
+```sh
+./setup-venv.sh
+source .venv/bin/activate
+```
+
+This will create a `.venv` folder and install all dependencies from `pyproject.toml` (or `requirements.txt` if present).
+
+---
 
 ## How to install hooks
 
@@ -30,16 +105,19 @@ Git hooks must be located in the `.git/hooks` directory of your repository to wo
 5. On Unix systems, make it executable with `chmod +x hookname`
 
 
-### Modular pre-commit hooks (recommended)
+### Modular pre-commit hooks (recommended, Python-based)
 
-To use all pre-commit hooks in this collection, use the dispatcher:
+**Python 3 is required for all advanced hooks and the dispatcher.**
+
+To use all pre-commit hooks in this collection, use the Python dispatcher:
 
 ```bash
 # From your Git repository root
-cp /path/to/.githooks/pre-commit/dispatcher.hook .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit  # On Unix systems
+cp /path/to/.githooks/pre-commit/dispatcher.py .git/hooks/pre-commit
+# (Optional) On Unix systems, make it executable:
+chmod +x .git/hooks/pre-commit
 ```
-This will run every `*.hook` script in the `pre-commit` folder, in order. Add or remove `.hook` scripts to customize your workflow.
+This will run every `*.hook` script in the `pre-commit` folder using Python, in order. Add or remove `.hook` scripts to customize your workflow.
 
 ## Dependencies for Conventional Commit Hooks
 
