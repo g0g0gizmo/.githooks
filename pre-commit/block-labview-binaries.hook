@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""
+Block LabVIEW binary files from being committed.
+Blocks common LabVIEW artifacts: .aliases, .lvlps, .lvbitx, .lvappimg, .lvuser, .lvmodel, .lvsc, .lvxlib, .lvlibp, .lvbit, .lvappimgx, .lvtest, .lvproj, .ctt
+"""
+import sys
+import subprocess
+
+BLOCKED_EXTS = (
+    '.aliases', '.lvlps', '.lvbitx', '.lvappimg', '.lvuser', '.lvmodel', '.lvsc', '.lvxlib', '.lvlibp',
+    '.lvbit', '.lvappimgx', '.lvtest', '.lvproj', '.ctt'
+)
+
+def staged_files():
+    r = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True)
+    if r.returncode != 0:
+        return []
+    return [l.strip() for l in r.stdout.splitlines() if l.strip()]
+
+def has_blocked(files):
+    return [f for f in files if f.lower().endswith(BLOCKED_EXTS)]
+
+def main():
+    files = staged_files()
+    print(f"[block-labview-binaries] Staged files: {files}")
+    blocked = has_blocked(files)
+    print(f"[block-labview-binaries] Blocked files: {blocked}")
+    if blocked:
+        print("\033[91m[pre-commit] Blocked LabVIEW binary files detected:\033[0m", file=sys.stderr)
+        for f in blocked:
+            print(f"  - {f}", file=sys.stderr)
+        print("\033[91mRemove these files from the commit or add them to .gitignore.\033[0m", file=sys.stderr)
+        return 1
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
