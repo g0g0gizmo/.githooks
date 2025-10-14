@@ -1,0 +1,58 @@
+"""
+Warns when LV files are staged but LabVIEW Git Hooks aren’t installed.
+Non-blocking: returns 0, prints guidance.
+"""
+import subprocess
+import sys
+import os
+
+LV_EXTS = (
+    '.vi', '.vim', '.vit', '.ctl', '.ctt', '.lvclass', '.lvlib', '.lvproj', '.lvlibp'
+)
+
+def staged_files():
+    r = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True)
+    if r.returncode != 0:
+        return []
+    return [l.strip() for l in r.stdout.splitlines() if l.strip()]
+
+def has_lv_files(files):
+    return any(f.lower().endswith(LV_EXTS) for f in files)
+
+def lv_hooks_installed():
+    # heuristic: g-cli exists and .git/hooks/pre-commit contains lv-git-hooks reference or installed shims
+    from shutil import which
+    if which('g-cli') is None:
+        return False
+    hooks_dir = os.path.join('.git','hooks')
+    pre = os.path.join(hooks_dir, 'pre-commit')
+    pre_bat = os.path.join(hooks_dir, 'pre-commit.bat')
+    for p in (pre, pre_bat):
+        try:
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                s = fh.read().lower()
+                if 'lv-git-hooks' in s or 'g-cli' in s:
+                    return True
+        except Exception:
+            pass
+    return False
+
+def main():
+    files = staged_files()
+    if not files or not has_lv_files(files):
+        return 0
+    if lv_hooks_installed():
+        return 0
+    msg = (
+        "[lv-hooks] LabVIEW files detected in the commit, but LV Git Hooks don't seem installed.\n"
+        "Install them to run LV checks/formatters automatically.\n\n"
+        "Quick start on Windows (PowerShell):\n"
+        "  pwsh ./install-lv-hooks.ps1\n\n"
+        "Config file: .lv-git-hooks-config.json\n"
+        "Docs: https://gitlab.com/felipe_public/lv-git-hooks\n"
+    )
+    print(msg)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
