@@ -1,0 +1,17 @@
+"""
+Run commitmint CLI: multi-language staged-file formatting/linting.
+Non-blocking: prints warnings when tools are missing and continues.
+"""
+import sys
+import subprocess
+from shutil import which
+
+def main():
+    # Prefer venv python if present
+    python = which('python') or sys.executable
+    cmd = [python, '-m', 'commitmint.cli']
+    r = subprocess.run(cmd)
+    return r.returncode
+
+if __name__ == '__main__':
+    sys.exit(main())
