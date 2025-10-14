@@ -1,0 +1,134 @@
+"""
+Generate LVCompare reports for staged LabVIEW files by diffing against HEAD.
+
+Behavior:
+- Detect staged LabVIEW artifacts (.vi, .vim, .ctl, .lvclass, .lvlib, .lvproj, .lvlibp)
+- For each, materialize HEAD and INDEX versions to temp files
+- Invoke LVCompare.exe to produce an HTML report if possible
+- Save reports under .lvcompare-reports/ and print a summary
+
+Notes:
+- Set environment variable LVCOMPARE_EXE to the full path of LVCompare.exe for best results
+- Known default locations will be tried if LVCOMPARE_EXE is not set
+- Non-blocking: returns 0 even if LVCompare is missing or reports cannot be generated
+"""
+from __future__ import annotations
+import os
+import sys
+import subprocess
+import tempfile
+import shutil
+import time
+from pathlib import Path
+
+LV_EXTS = (
+    '.vi', '.vim', '.vit', '.ctl', '.ctt', '.lvclass', '.lvlib', '.lvproj', '.lvlibp'
+)
+
+REPO = Path.cwd()
+REPORT_DIR = REPO / '.lvcompare-reports'
+
+def tool_exists(tool: str) -> bool:
+    from shutil import which
+    return which(tool) is not None
+
+def run(cmd: list[str], cwd: Path | None = None, text: bool = True, check: bool = False):
+    return subprocess.run(cmd, cwd=str(cwd) if cwd else None, text=text, capture_output=True, check=check)
+
+def staged_files() -> list[str]:
+    r = run(['git', 'diff', '--cached', '--name-only'])
+    if r.returncode != 0:
+        return []
+    return [l.strip() for l in r.stdout.splitlines() if l.strip()]
+
+def is_lv_file(p: str) -> bool:
+    return p.lower().endswith(LV_EXTS)
+
+def blob_to_file(spec: str, out_path: Path) -> bool:
+    """Write git object to a file (supports binary). spec examples: 'HEAD:path', ':path' (index)."""
+    try:
+        r = subprocess.run(['git', 'show', spec], capture_output=True, text=False)
+        if r.returncode != 0:
+            return False
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, 'wb') as f:
+            f.write(r.stdout)
+        return True
+    except Exception:
+        return False
+
+def find_lvcompare() -> Path | None:
+    env = os.environ.get('LVCOMPARE_EXE')
+    if env and Path(env).is_file():
+        return Path(env)
+    candidates = [
+        r"C:\Program Files\National Instruments\Shared\LabVIEW Compare\LVCompare.exe",
+        r"C:\Program Files (x86)\National Instruments\Shared\LabVIEW Compare\LVCompare.exe",
+    ]
+    for c in candidates:
+        p = Path(c)
+        if p.is_file():
+            return p
+    return None
+
+def compare_and_report(lvcompare: Path, left: Path, right: Path, report: Path) -> bool:
+    """Try to generate an HTML report. Fall back to launching compare headless if report unsupported."""
+    report.parent.mkdir(parents=True, exist_ok=True)
+    # Try common report switches; behavior may vary by LabVIEW version
+    for args in (
+        [str(lvcompare), str(left), str(right), '-report', str(report)],
+        [str(lvcompare), str(left), str(right), '/report', str(report)],
+        [str(lvcompare), str(left), str(right)],
+    ):
+        try:
+            r = subprocess.run(args, capture_output=True, text=True)
+            # If report file was created and non-empty, success
+            if report.exists() and report.stat().st_size > 0:
+                return True
+            # Sometimes LVCompare returns 0 but doesn't create report; continue trying
+        except Exception:
+            pass
+    return False
+
+def main() -> int:
+    files = [f for f in staged_files() if is_lv_file(f)]
+    if not files:
+        return 0
+    lvcompare = find_lvcompare()
+    if not lvcompare:
+        print("[lv-diff] LVCompare.exe not found. Set LVCOMPARE_EXE env var to LVCompare.exe path to enable reports.")
+        return 0
+
+    created = []
+    with tempfile.TemporaryDirectory(prefix='lv-diff-') as td:
+        tdir = Path(td)
+        for f in files:
+            left = tdir / 'head' / f  # HEAD version
+            right = tdir / 'index' / f # INDEX version
+            head_ok = blob_to_file(f'HEAD:{f}', left)
+            idx_ok = blob_to_file(f':{f}', right)
+            if not idx_ok:
+                # If index version missing (e.g., deletion), skip
+                continue
+            # If HEAD missing, compare against empty won't work; just report that it's new
+            stamp = time.strftime('%Y%m%d-%H%M%S')
+            out = REPORT_DIR / f"{Path(f).name}-{stamp}.html"
+            if head_ok:
+                ok = compare_and_report(lvcompare, left, right, out)
+                if ok:
+                    created.append(out)
+                else:
+                    print(f"[lv-diff] Could not generate report for {f}.", file=sys.stderr)
+            else:
+                print(f"[lv-diff] New LabVIEW file staged: {f}. No HEAD to compare.")
+
+    if created:
+        print("[lv-diff] LVCompare reports created:")
+        for p in created:
+            rel = p.relative_to(REPO)
+            print(f"  - {rel}")
+        print("You can open the HTML reports to inspect detailed changes (e.g., wire movement, terminal type changes).")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
