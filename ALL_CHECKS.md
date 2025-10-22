@@ -81,6 +81,11 @@ New hygiene and config checks
   - Blocks: Yes when new potential secrets are detected or when baseline is missing
   - Notes: Create a baseline once with `detect-secrets scan > .secrets.baseline` and audit with `detect-secrets audit .secrets.baseline`.
 
+- warn-if-lv-hooks-missing.hook
+  - What: If staged files include LabVIEW artifacts (vi/vim/ctl/lvclass/lvlib/lvproj, etc.) and LV Git Hooks are not installed, prints an install hint (non-blocking).
+  - Blocks: No
+  - Notes: Install LV Git Hooks with `pwsh ./install-lv-hooks.ps1`. Configure hooks in `.lv-git-hooks-config.json`.
+
 ## Prepare-commit-msg checks (before the editor opens or when message is prepared)
 
 - insert-issue-id.hook
@@ -152,6 +157,14 @@ New hygiene and config checks
   - What: If the last commit is a conventional feat or fix (or BREAKING CHANGE), runs standard-version (without tagging/changelog/commit) to bump versions.
   - Blocks: Yes if npx is missing or standard-version fails; otherwise prints success.
   - Deps: Node.js + npx, standard-version
+
+LabVIEW hooks integration
+- .lv-git-hooks-config.json
+  - What: Local config listing hook types and LabVIEW hook IDs to install (via LV Git Hooks).
+  - Notes: Default includes pre-commit and commit-msg, with lv-fmt example.
+- install-lv-hooks.ps1
+  - What: Installs LV Git Hooks locally using g-cli (supports --lv-only).
+  - Deps: LabVIEW + g-cli on PATH (LV Venv Tools).
 
 - post-checkout/delete-pyc-files.hook
   - What: Intended to delete .pyc files on branch checkout.

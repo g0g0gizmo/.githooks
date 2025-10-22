@@ -1,20 +1,120 @@
+
+# ============================================================================== 
+# Function to copy a specific hook type
 # ==============================================================================
-# Git Hooks Complete Installation Script for Windows (PowerShell)
+function Copy-HookType {
+    param(
+        [string]$SourceDir,
+        [string]$HooksDir
+    )
+    $hookType = Split-Path -Leaf $SourceDir
+    Write-Host "[INFO] Installing $hookType hooks..." -ForegroundColor Blue
+    $hookFiles = Get-ChildItem -Path $SourceDir -Filter "*.hook"
+    foreach ($hookFile in $hookFiles) {
+        $hookName = $hookFile.BaseName -replace '\.hook$', ''
+        $destPath = Join-Path $HooksDir $hookType
+        # Check if this is a Python script and update shebang
+        $content = Get-Content $hookFile.FullName -Raw
+        if ($content -match '#!.*python') {
+            # Update shebang to use virtual environment
+            $pythonExe = Join-Path $VenvDir "Scripts\python.exe"
+            $updatedContent = $content -replace '#!.*python.*', "#!$pythonExe"
+            $updatedContent | Out-File -FilePath $destPath -Encoding UTF8 -NoNewline
+            Write-Host "[SUCCESS] Installed $hookType/$hookName (updated for venv)" -ForegroundColor Green
+        } else {
+            Copy-Item $hookFile.FullName $destPath -Force
+            Write-Host "[SUCCESS] Installed $hookType/$hookName" -ForegroundColor Green
+        }
+    }
+}
+
+# ============================================================================== 
+# Function to install hooks locally
 # ==============================================================================
-# This script:
-# 1. Sets up a Python virtual environment
-# 2. Installs all required dependencies (Python packages and system tools)
-# 3. Installs git hooks to a repository or globally
-#
-# Usage: .\install-all.ps1 [-RepoPath <path>] [-Global]
-#   -RepoPath: Path to git repository (optional, current dir if not specified)
-#   -Global: Install hooks globally for all repositories
-#
-# Examples:
-#   .\install-all.ps1                                - Install in current directory
-#   .\install-all.ps1 -RepoPath "C:\my\project"      - Install in specific repository
-#   .\install-all.ps1 -Global                       - Install globally
+function Install-LocalHooks {
+    # Check if repository exists and has .git directory
+    $gitDir = Join-Path $RepoPath ".git"
+    if (-not (Test-Path $gitDir)) {
+        Write-Host "[ERROR] $RepoPath is not a Git repository" -ForegroundColor Red
+        return
+    }
+    $hooksDir = Join-Path $gitDir "hooks"
+    # Create hooks directory if it doesn't exist
+    if (-not (Test-Path $hooksDir)) {
+        New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
+    }
+    Write-Host "[INFO] Available hook types:" -ForegroundColor Blue
+    $hookDirs = Get-ChildItem -Path $ScriptDir -Directory | Where-Object { 
+        Test-Path (Join-Path $_.FullName "README.md") 
+    }
+    $count = 0
+    $hookTypes = @{}
+    foreach ($hookDir in $hookDirs) {
+        $count++
+        $hookName = $hookDir.Name
+        Write-Host "  $count. $hookName" -ForegroundColor White
+        $hookTypes[$count] = $hookName
+    }
+    Write-Host ""
+    $selection = Read-Host "Select hook types to install (e.g., 1,3,5) or 'all' for all hooks"
+    if ($selection -eq "all") {
+        # Install all hooks
+        foreach ($hookDir in $hookDirs) {
+            Copy-HookType $hookDir.FullName $hooksDir
+        }
+    } else {
+        # Install selected hooks
+        $selections = $selection -split ',' | ForEach-Object { $_.Trim() }
+        foreach ($sel in $selections) {
+            if ($hookTypes.ContainsKey([int]$sel)) {
+                $hookTypeName = $hookTypes[[int]$sel]
+                $hookTypeDir = Join-Path $ScriptDir $hookTypeName
+                Copy-HookType $hookTypeDir $hooksDir
+            }
+        }
+    }
+}
+
+# ============================================================================== 
+# Function to install hooks globally
 # ==============================================================================
+function Install-GlobalHooks {
+    $defaultHooksDir = Join-Path $env:USERPROFILE ".git-hooks"
+    Write-Host "[INFO] Global hooks directory: $defaultHooksDir" -ForegroundColor Blue
+    # Create the global hooks directory if it doesn't exist
+    if (-not (Test-Path $defaultHooksDir)) {
+        New-Item -ItemType Directory -Path $defaultHooksDir -Force | Out-Null
+        Write-Host "[SUCCESS] Created global hooks directory" -ForegroundColor Green
+    }
+    # Configure Git to use the global hooks directory
+    try {
+        git config --global core.hooksPath $defaultHooksDir
+        Write-Host "[SUCCESS] Configured Git to use global hooks directory" -ForegroundColor Green
+    } catch {
+        Write-Host "[ERROR] Failed to configure Git global hooks path: $_" -ForegroundColor Red
+        return
+    }
+    # Copy all hooks to global directory
+    Write-Host "[INFO] Copying hooks to global directory..." -ForegroundColor Blue
+    $hookDirs = Get-ChildItem -Path $ScriptDir -Directory | Where-Object { 
+        Test-Path (Join-Path $_.FullName "README.md") 
+    }
+    foreach ($hookDir in $hookDirs) {
+        $hookType = $hookDir.Name
+        Write-Host "[INFO] Processing $hookType hooks..." -ForegroundColor Blue
+        $hookFiles = Get-ChildItem -Path $hookDir.FullName -Filter "*.hook"
+        foreach ($hookFile in $hookFiles) {
+            $hookName = $hookFile.BaseName -replace '\.hook$', ''
+            $destPath = Join-Path $defaultHooksDir $hookType
+            try {
+                Copy-Item $hookFile.FullName $destPath -Force
+                Write-Host "[SUCCESS] Installed $hookType/$hookName" -ForegroundColor Green
+            } catch {
+                Write-Host ("[WARNING] Failed to install {0}/{1}: {2}" -f $hookType, $hookName, $_) -ForegroundColor Yellow
+            }
+        }
+    }
+}
 
 param(
     [string]$RepoPath = (Get-Location).Path,
@@ -102,6 +202,20 @@ if (Test-Path $RequirementsFile) {
 }
 
 Write-Host ""
+
+# Step 2.5: Install node-notifier for Node.js popups if Node.js is available
+Write-Host "Step 2.5: Installing node-notifier for Node.js popups (if Node.js is available)" -ForegroundColor Yellow
+Write-Host "===============================================================" -ForegroundColor Yellow
+try {
+    $nodeVersion = node --version 2>&1
+    Write-Host "[INFO] Node.js found: $nodeVersion" -ForegroundColor Green
+    Write-Host "[INFO] Installing node-notifier..." -ForegroundColor Blue
+    npm install node-notifier --no-save | Out-Null
+    Write-Host "[SUCCESS] node-notifier installed" -ForegroundColor Green
+} catch {
+    Write-Host "[WARNING] Node.js not found, skipping node-notifier install" -ForegroundColor Yellow
+}
+
 Write-Host "Step 2: Checking System Dependencies" -ForegroundColor Yellow
 Write-Host "====================================" -ForegroundColor Yellow
 Write-Host ""
@@ -280,7 +394,7 @@ function Install-GlobalHooks {
                 Copy-Item $hookFile.FullName $destPath -Force
                 Write-Host "[SUCCESS] Installed $hookType/$hookName" -ForegroundColor Green
             } catch {
-                Write-Host "[WARNING] Failed to install $hookType/$hookName: ${_}" -ForegroundColor Yellow
+                Write-Host ("[WARNING] Failed to install {0}/{1}: {2}" -f $hookType, $hookName, $_) -ForegroundColor Yellow
             }
         }
     }

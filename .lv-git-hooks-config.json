@@ -1,0 +1,9 @@
+{
+  "install-hook-types": [
+    "pre-commit",
+    "commit-msg"
+  ],
+  "hooks": [
+    { "id": "lv-fmt" }
+  ]
+}

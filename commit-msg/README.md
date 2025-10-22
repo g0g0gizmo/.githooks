@@ -10,8 +10,9 @@ git commit
 
 ## commit-msg git hooks for:
 
+* **enforce-insert-issue-number.hook** - Warns if the commit message for an issue branch does not start with the required ISSUE-# string (LabVIEW-friendly for issue tracking)
+* **conventional-commitlint.hook** - Warns if the commit message does not follow the Conventional Commits format (requires npx/commitlint)
 * [commit-msg-jira](https://github.com/aitemr/awesome-git-hooks/blob/master/commit-msg/commit-msg-jira) - hook to validate for jira issue or the word merge.
- 
 ## support
 
 If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new).

@@ -1,0 +1,23 @@
+Metadata-Version: 2.4
+Name: githooks
+Version: 0.1.0
+Summary: A collection of cross-platform Python git hooks.
+Requires-Python: >=3.8
+Requires-Dist: gitpython>=3.1.0
+Requires-Dist: click>=8.0.0
+Requires-Dist: colorama>=0.4.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: requests>=2.25.0
+Requires-Dist: black>=21.0.0
+Requires-Dist: flake8>=4.0.0
+Requires-Dist: pylint>=2.12.0
+Requires-Dist: mypy>=0.910
+Requires-Dist: isort>=5.10.0
+Requires-Dist: markdown>=3.3.0
+Requires-Dist: pygments>=2.10.0
+Requires-Dist: pytest>=6.2.0
+Requires-Dist: pytest-cov>=3.0.0
+Requires-Dist: shellcheck-py>=0.11.0.1
+Requires-Dist: yamllint>=1.32.0
+Requires-Dist: detect-secrets>=1.5.0
+Requires-Dist: tomli>=2.0.1

@@ -1,3 +1,4 @@
+
 ## pre push 
 
 Called prior to a push to a remote. In addition to the parameters, additional information, separated by a space is passed in through stdin in the form of "<local ref> <local sha1> <remote ref> <remote sha1>". Parsing the input can get you additional information that you can use to check. For instance, if the local sha1 is 40 zeros long, the push is a delete and if the remote sha1 is 40 zeros, it is a new branch. This can be used to do many comparisons of the pushed ref to what is currently there. A non-zero exit status aborts the push.
@@ -8,9 +9,20 @@ Called prior to a push to a remote. In addition to the parameters, additional in
 git push
 ```
 
+
+
+## Warning: Unconventional Commits
+
+If you attempt to push commits that do not follow the [Conventional Commits](https://www.conventionalcommits.org/) specification, you may receive a warning. It is recommended to use the conventional commit format (e.g., `feat:`, `fix:`, `chore:`) in your commit messages to ensure consistency and enable automated tooling.
+
 ## pre push git hooks for:
 
-* [pre-push](https://github.com/aitemr/awesome-git-hooks/blob/master/pre-push/pre-push-protect-branches) - Git pre-push hook to prevent force pushing master branch.
+* **pre-push-protect-branches** - Prevents force-pushing to protected branches (master, dev, release-*, patch-*)
+* **prevent-bad-push.hook** - Additional push policy enforcement
+
+## LabVIEW-specific notes
+
+For LabVIEW projects, use pre-commit hooks to block binary artifacts and generate diff reports. Pre-push hooks are mainly for branch protection and general policy.
 
 ## support
 

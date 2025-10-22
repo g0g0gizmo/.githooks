@@ -85,6 +85,23 @@ if exist "%REQUIREMENTS_FILE%" (
 )
 
 echo.
+
+echo Step 2.5: Installing node-notifier for Node.js popups (if Node.js is available)
+echo ===============================================================
+where node >nul 2>&1
+if %errorlevel%==0 (
+    echo [INFO] Node.js found
+    echo [INFO] Installing node-notifier...
+    npm install node-notifier --no-save >nul 2>&1
+    if %errorlevel%==0 (
+        echo [SUCCESS] node-notifier installed
+    ) else (
+        echo [WARNING] Failed to install node-notifier
+    )
+) else (
+    echo [WARNING] Node.js not found, skipping node-notifier install
+)
+
 echo Step 2: Checking System Dependencies
 echo ====================================
 REM Detect platform (Git Bash, PowerShell, or CMD)

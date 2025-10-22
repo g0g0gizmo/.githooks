@@ -25,3 +25,6 @@ Desktop.ini
 tests/.coverage
 coverage.xml
 htmlcov/
+.lvcompare-reports/
+
+node_modules/
