@@ -1,0 +1,41 @@
+{
+    // Recommended extensions for AI, agentic, Python, JS/TS, Markdown, Docker, and productivity workflows
+    "recommendations": [
+        // --- Core Language Support ---
+        "ms-python.python", // Python language support
+        "ms-python.vscode-pylance", // Python type checking, IntelliSense
+        "ms-toolsai.jupyter", // Jupyter Notebooks
+        "ms-toolsai.jupyter-keymap", // Jupyter keymaps
+        "ms-toolsai.jupyter-renderers", // Jupyter rich output
+        "esbenp.prettier-vscode", // Prettier code formatter (JS/TS/JSON/YAML/Markdown)
+        "dbaeumer.vscode-eslint", // JS/TS linting
+        "ms-vscode.vscode-typescript-next", // Latest TypeScript support
+        "ms-azuretools.vscode-docker", // Docker support
+        "redhat.vscode-yaml", // YAML support
+        "yzhang.markdown-all-in-one", // Markdown productivity
+        "DavidAnson.vscode-markdownlint", // Markdown linting
+        // --- AI & Agentic Tools ---
+        "GitHub.copilot", // GitHub Copilot
+        "GitHub.copilot-chat", // Copilot Chat
+        "kodu-ai.claude-coder", // Claude Coder (agentic coding)
+        "TabNine.tabnine-vscode", // TabNine AI completions
+        "Kilo-Org.kilocode", // Kilo agentic engineering
+        "voideditor.void", // Void agentic IDE
+        // --- Productivity & Utilities ---
+        "eamodio.gitlens", // GitLens for Git insights
+        "mhutchie.git-graph", // Git graph visualizer
+        "hediet.vscode-drawio", // Diagrams.net integration
+        "hediet.debug-visualizer", // Debug visualizer
+        "ritwickdey.liveserver", // Live server for web dev
+        "vscode-icons-team.vscode-icons", // File icons
+        "PKief.material-icon-theme", // Material icon theme
+        "vscodevim.vim", // Vim keybindings
+        "vscode-neovim.vscode-neovim", // Neovim integration
+        "ms-vscode.powershell", // PowerShell support
+        "ms-vscode.makefile-tools", // Makefile support
+        "ms-vsliveshare.vsliveshare" // Live Share collaboration
+    ],
+    "unwantedRecommendations": [
+        // Add any extensions you want to avoid here
+    ]
+}

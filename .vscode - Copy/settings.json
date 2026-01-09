@@ -1,0 +1,841 @@
+{
+    "files.autoSave": "onWindowChange",
+    // === Recommended: Live Server ===
+    "liveServer.settings.donotShowInfoMsg": true,
+    "liveServer.settings.donotVerifyTags": true,
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.wait": 100,
+    "liveServer.settings.CustomBrowser": "chrome",
+
+    // Default formatters - language-specific formatters override these
+    "notebook.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": null,
+    // === Recommended: Editor Productivity ===
+    "editor.smoothScrolling": true,
+    "editor.suggest.showStatusBar": true,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.cursorBlinking": "phase",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": true,
+    "editor.renderFinalNewline": "on",
+    "editor.renderLineHighlight": "all",
+    "editor.guides.indentation": true,
+    "editor.guides.highlightActiveIndentation": true,
+    "editor.defaultFoldingRangeProvider": null,
+    "git.suggestSmartCommit": false,
+    "github.copilot.advanced": {
+        "authProvider": "github",
+        "debug.overrideEngine": "",
+        "debug.overrideProxyUrl": "",
+        "debug.testOverrideProxyUrl": "",
+        "debug.overrideLogLevels": {
+            "*": "ERROR"
+        }
+    },
+    "github.copilot.chat.generateTests.codeLens": true,
+    "github.copilot.editor.enableCodeActions": true,
+    "github.copilot.renameSuggestions.triggerAutomatically": true,
+    "github.copilot.nextEditSuggestions.fixes": true,
+    "editor.inlineSuggest.edits.allowCodeShifting": "always",
+    "editor.inlineSuggest.showToolbar": "always",
+    "editor.inlineSuggest.edits.renderSideBySide": "auto",
+    "editor.inlineSuggest.minShowDelay": 0,
+    "editor.inlineSuggest.suggestOnTriggerCharacters": true,
+    "chat.commandCenter.enabled": true,
+    // === Recommended: Chat/AI/Agents ===
+    "chat.experimental.quickActions": true,
+    "chat.experimental.suggestedActions": true,
+    "workbench.settings.showAISearchToggle": true,
+    "workbench.editor.untitled.hint": "hidden",
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.editor.tabCloseButton": "left",
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.editor.wrapTabs": true,
+    "workbench.commandPalette.experimental.askChatLocation": "chatView",
+    "search.searchView.semanticSearchBehavior": "manual",
+    "search.quickOpen.includeSymbols": true,
+    "search.quickOpen.includeHistory": true,
+    "search.searchView.keywordSuggestions": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "files.autoSaveWhenNoErrors": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.hg/store/**": true
+    },
+    "editor.formatOnSave": true,
+    // === Recommended: Markdown ===
+    "markdown.preview.scrollPreviewWithEditor": true,
+    "markdown.preview.scrollEditorWithPreview": true,
+    "markdown.preview.markEditorSelection": true,
+    "markdown.preview.doubleClickToSwitchToEditor": true,
+    "markdown.previewFrontMatter.enabled": true,
+    "markdown.previewFrontMatter.render": "table",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    // Linter configuration - run on modification and window change
+    "eslint.run": "onType",
+    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+    "python.analysis.diagnosticMode": "workspace",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "always"
+    },
+    "problems.autoReveal": true,
+    "problems.showInStatusBar": "always",
+    "problems.showCurrentInStatus": true,
+    "problems.sortOrder": "severity",
+    "problems.decorations.enabled": true,
+
+    // === Python Diagnostics & Error Reporting ===
+    "editor.codeActionsOnSaveTimeout": 2000,
+    // === Recommended: Docker ===
+    "docker.showStartPage": false,
+    "docker.containers.showSystemContainers": true,
+    "docker.explorerRefreshInterval": 300,
+    "docker.defaultRegistryPath": "docker.io",
+
+    // ============================================
+    // 🚀 SUPERCHARGED EXTENSION SETTINGS
+    // ============================================
+
+    // === Editor Enhancements ===
+    // (already set above, removed duplicate)
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.minimap.enabled": true,
+    "editor.minimap.maxColumn": 155,
+    "editor.minimap.renderCharacters": false,
+    "editor.minimap.showSlider": "always",
+    "editor.rulers": [80, 155],
+    // === Recommended: GitHub ===
+    "github.gitAuthentication": true,
+    "github.gitProtocol": "https",
+    "github.pullRequests.terminalAuthentication": true,
+    "github.pullRequests.showTimeline": true,
+    "github.pullRequests.showReviewSummary": true,
+    "github.pullRequests.showFileChanges": true,
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 155,
+    "editor.linkedEditing": true,
+    "editor.linkedEditingAutoClose": true,
+    "editor.stickyScroll.enabled": true,
+    "editor.stickyScroll.maxLineCount": 10,
+    "editor.quickSuggestions": {
+        "other": "on",
+        "comments": "on",
+        "strings": "on"
+    },
+    "editor.snippetSuggestions": "top",
+    // (already set above, removed duplicate)
+    "editor.tabSize": 4,
+    // (already set above, removed duplicate)
+    "editor.detectIndentation": true,
+    "editor.insertSpaces": true,
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    // (already set above, removed duplicate)
+    "files.insertFinalNewline": true,
+    // === Recommended: Remote/WSL/Containers ===
+    "remote.WSL.fileWatcher.polling": true,
+    "remote.WSL.fileWatcher.pollingInterval": 5000,
+    "remote.SSH.remotePlatform": {
+        "*": "linux"
+    },
+    "remote.SSH.showLoginTerminal": true,
+    "remote.SSH.useLocalServer": true,
+    "remote.containers.showExplorer": true,
+    "files.trimFinalNewlines": true,
+
+    // === Copilot Chat Experience ===
+    "github.copilot.chat.localeOverride": "auto",
+    "github.copilot.chat.useProjectTemplates": true,
+    "github.copilot.chat.scopeSelection": false,
+    "github.copilot.chat.terminalChatLocation": "chatView",
+    "chat.detectParticipant.enabled": true,
+    "chat.checkpoints.enabled": true,
+    "chat.checkpoints.showFileChanges": false,
+    "chat.editRequests": "inline",
+    "chat.editor.fontFamily": "default",
+    "chat.editor.fontSize": 14,
+    "chat.editor.fontWeight": "default",
+    "chat.editor.lineHeight": 0,
+    "chat.editor.wordWrap": "off",
+    "chat.editing.confirmEditRequestRemoval": true,
+    "chat.editing.confirmEditRequestRetry": true,
+    "chat.editing.autoAcceptDelay": 0,
+    "chat.fontFamily": "default",
+    "chat.fontSize": 13,
+    "chat.notifyWindowOnConfirmation": true,
+    "chat.notifyWindowOnResponseReceived": true,
+    "chat.tools.terminal.autoReplyToPrompts": false,
+    "chat.tools.terminal.terminalProfile.windows": null,
+    "chat.tools.terminal.terminalProfile.linux": null,
+    "chat.tools.terminal.terminalProfile.osx": null,
+    "chat.useAgentsMdFile": true,
+    "chat.math.enabled": false,
+    "github.copilot.chat.codesearch.enabled": false,
+    "chat.emptyState.history.enabled": false,
+    "chat.sendElementsToChat.enabled": true,
+    "chat.useNestedAgentsMdFiles": false,
+    "github.copilot.chat.customOAIModels": {},
+    "github.copilot.chat.edits.suggestRelatedFilesFromGitHistory": true,
+
+    // === Copilot Agents & MCP Controls ===
+    "chat.agent.enabled": true,
+    "chat.agent.maxRequests": 100,
+    "github.copilot.chat.agent.autoFix": true,
+    "chat.mcp.access": "registry",
+    "chat.mcp.autoStart": "newAndOutdated",
+    "chat.mcp.discovery.enabled": {
+        "claude-desktop": true
+    },
+    "chat.mcp.gallery.enabled": true,
+    "chat.tools.global.autoApprove": false,
+    "chat.agent.thinkingStyle": "collapsed",
+    "chat.agent.todoList.position": "default",
+    "github.copilot.chat.newWorkspaceCreation.enabled": true,
+    "github.copilot.chat.agent.thinkingTool": false,
+    "github.copilot.chat.virtualTools.threshold": 128,
+    "chat.agentSessionsViewLocation": "disabled",
+
+    // === Inline Chat, Review & Accessibility ===
+    "inlineChat.finishOnType": false,
+    "inlineChat.holdToSpeech": true,
+    "editor.inlineSuggest.syntaxHighlightingEnabled": true,
+    "inlineChat.lineEmptyHint": false,
+    "inlineChat.lineNaturalLanguageHint": true,
+    "github.copilot.chat.editor.temporalContext.enabled": false,
+    "github.copilot.chat.reviewSelection.enabled": true,
+    "github.copilot.chat.reviewSelection.instructions": [],
+    "inlineChat.accessibleDiffView": "auto",
+    "accessibility.signals.chatRequestSent": {
+        "sound": "auto",
+        "announcement": "auto"
+    },
+    "accessibility.signals.chatResponseReceived": {
+        "sound": "auto"
+    },
+    "accessibility.signals.chatEditModifiedFile": {
+        "sound": "auto"
+    },
+    "accessibility.signals.chatUserActionRequired": {
+        "sound": "auto",
+        "announcement": "auto"
+    },
+    "accessibility.voice.keywordActivation": "off",
+    "accessibility.voice.autoSynthesize": "off",
+    "accessibility.voice.speechTimeout": 1200,
+    "github.copilot.chat.startDebugging.enabled": true,
+    "github.copilot.chat.copilotDebugCommand.enabled": true,
+    "github.copilot.chat.setupTests.enabled": true,
+    "notebook.experimental.generate": true,
+    "github.copilot.chat.edits.newNotebook.enabled": true,
+    "github.copilot.chat.notebook.followCellExecution.enabled": false,
+
+    // === Python Supercharged ===
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.variableTypes": false,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.logLevel": "Error",
+    "python.analysis.indexing": true,
+    "python.analysis.extraPaths": [],
+    "python.languageServer": "Pylance",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.showPrompt": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.diagnosticSeverityOverrides": {
+        "reportGeneralTypeIssues": "warning",
+        "reportOptionalMemberAccess": "warning",
+        "reportOptionalSubscript": "warning",
+        "reportOptionalOperand": "warning",
+        "reportOptionalIterable": "warning",
+        "reportOptionalContextManager": "warning",
+        "reportOptionalCallEntry": "warning",
+        "reportOptionalArgumentType": "warning",
+        "reportOptionalAssignment": "warning",
+        "reportOptionalReturnValue": "warning",
+        "reportUnusedImport": "error",
+        "reportUnusedVariable": "warning",
+        "reportUnusedClass": "warning",
+        "reportUnusedFunction": "warning",
+        "reportDuplicateImport": "error",
+        "reportIncompatibleMethodOverride": "warning",
+        "reportConstantRedefinition": "error",
+        "reportMissingTypeStubs": "warning"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll.flake8": "explicit",
+            "source.fixAll.pylint": "explicit"
+        },
+        "editor.rulers": [155]
+    },
+    "isort.args": ["--profile", "black"],
+
+    // === Python Linting & Security Supercharged ===
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": ["--max-line-length=155", "--extend-ignore=E203,W503", "--select=E,W,F"],
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": ["--max-line-length=155", "--disable=C0111"],
+    "python.linting.banditEnabled": true,
+    "python.linting.banditArgs": ["-ll"],
+    "python.linting.pydocstyleEnabled": false,
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyArgs": ["--follow-imports=silent", "--no-error-summary"],
+    "python.formatting.blackArgs": ["--line-length=155"],
+    "flake8": {
+        "args": ["--max-line-length=155", "--extend-ignore=E203,W503,E501"]
+    },
+    "pylint": {
+        "args": ["--max-line-length=155"],
+        "lintOnSave": true
+    },
+    "bandit": {
+        "level": "medium",
+        "confidence": "high",
+        "skipTests": ["B101", "B601"]
+    },
+
+    // === Python Code Quality & Testing ===
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests", "-v", "--tb=short"],
+    "python.testing.unittestEnabled": false,
+    "python.linting.pylintUseMinimalCheckers": false,
+
+    // === VSCode Python Extensions Integration ===
+    "[python-conda]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+
+    // === ESLint & JavaScript/TypeScript Supercharged ===
+    "eslint.codeActionsOnSave.mode": "all",
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true,
+    "javascript.suggest.autoImports": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "javascript.preferences.importModuleSpecifier": "relative",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[yml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+
+    // === Prettier Supercharged ===
+    "prettier.enable": true,
+    "prettier.requireConfig": false,
+    "prettier.singleQuote": false,
+    "prettier.tabWidth": 2,
+    "prettier.useTabs": false,
+    "prettier.semi": true,
+    "prettier.trailingComma": "es5",
+    "prettier.printWidth": 155,
+
+    // === Markdown Supercharged ===
+    "markdown.preview.breaks": true,
+    "markdown.preview.linkify": true,
+    "markdown.preview.typographer": true,
+    "markdown.updateLinksOnFileMove.enabled": "always",
+    "markdown.validate.enabled": true,
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.formatOnSave": true,
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "on",
+            "strings": "on",
+            "other": "on"
+        }
+    },
+    // === Markdownlint - GitHub Style ===
+    "markdownlint.run": "onType",
+    "markdownlint.lintWorkspaceGlobs": ["**/*.md"],
+    "markdownlint.ignore": ["**/node_modules/**", "**/.venv/**", "**/output/**"],
+    "markdownlint.config": {
+        "default": true,
+        // ===== GitHub Flavored Markdown (GFM) Settings =====
+
+        // MD013: Line length - disabled (GitHub has no hard limit)
+        "MD013": false,
+
+        // MD033: Allow inline HTML (GitHub supports full HTML)
+        "MD033": false,
+
+        // MD041: First line doesn't need to be H1 (GitHub README flexibility)
+        "MD041": false,
+
+        // MD024: Allow duplicate headings in different sections
+        "MD024": {
+            "siblings_only": true
+        },
+
+        // MD003: ATX-style headings (# style) - GitHub standard
+        "MD003": {
+            "style": "atx"
+        },
+
+        // MD004: Unordered list style - use dashes (GitHub convention)
+        "MD004": {
+            "style": "dash"
+        },
+
+        // MD007: List indentation - 2 spaces (GitHub default)
+        "MD007": {
+            "indent": 2,
+            "start_indented": false
+        },
+
+        // MD009: No trailing spaces (except for line breaks)
+        "MD009": {
+            "br_spaces": 2,
+            "list_item_empty_lines": false,
+            "strict": false
+        },
+
+        // MD010: No hard tabs (use spaces)
+        "MD010": {
+            "code_blocks": false
+        },
+
+        // MD012: Multiple consecutive blank lines
+        "MD012": {
+            "maximum": 2
+        },
+
+        // MD022: Headings should be surrounded by blank lines
+        "MD022": {
+            "lines_above": 1,
+            "lines_below": 1
+        },
+
+        // MD025: Multiple top-level headings allowed (for long docs)
+        "MD025": false,
+
+        // MD026: No trailing punctuation in headings (except ? for questions)
+        "MD026": {
+            "punctuation": ".,;:!"
+        },
+
+        // MD030: Spaces after list markers
+        "MD030": {
+            "ul_single": 1,
+            "ol_single": 1,
+            "ul_multi": 1,
+            "ol_multi": 1
+        },
+
+        // MD031: Fenced code blocks surrounded by blank lines
+        "MD031": {
+            "list_items": true
+        },
+
+        // MD032: Lists surrounded by blank lines
+        "MD032": true,
+
+        // MD034: Allow bare URLs (GitHub auto-links them)
+        "MD034": false,
+
+        // MD040: Fenced code blocks should have language specified
+        "MD040": true,
+
+        // MD046: Code block style - fenced (```) for GitHub
+        "MD046": {
+            "style": "fenced"
+        },
+
+        // MD047: Files should end with newline (GitHub standard)
+        "MD047": true,
+
+        // MD049: Emphasis style - underscore or asterisk (GitHub supports both)
+        "MD049": {
+            "style": "asterisk"
+        },
+
+        // MD050: Strong style - asterisk (GitHub convention)
+        "MD050": {
+            "style": "asterisk"
+        }
+    },
+
+    // === HTML/CSS Supercharged ===
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.suggest.insertMode": "replace"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "html.autoClosingTags": true,
+    "html.format.wrapLineLength": 155,
+    "html.format.wrapAttributes": "auto",
+    "css.lint.unknownAtRules": "ignore",
+    "css.lint.compatibleVendorPrefixes": "warning",
+    "css.lint.vendorPrefix": "warning",
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact",
+        "typescript": "typescriptreact"
+    },
+
+    // === PowerShell Supercharged ===
+    "[powershell]": {
+        "editor.defaultFormatter": "ms-vscode.powershell",
+        "editor.formatOnSave": true
+    },
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+    "powershell.codeFormatting.useConstantStrings": true,
+    "powershell.codeFormatting.useCorrectCasing": true,
+    "powershell.integratedConsole.showOnStartup": false,
+
+    // === Git Enhanced ===
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    "git.fetchOnPull": true,
+    "git.pruneOnFetch": true,
+    "git.rebaseWhenSync": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "diffEditor.renderSideBySide": true,
+    "scm.defaultViewMode": "tree",
+
+    // === GitHub Integration ===
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": true,
+        "scminput": false,
+        "env": false,
+        "dotenv": false,
+        "yaml": false
+    },
+    // === File Associations ===
+    "files.associations": {
+        "*.md": "markdown",
+        "*.json": "jsonc",
+        ".env*": "dotenv",
+        "*.yaml": "yaml",
+        "*.yml": "yaml",
+        "*.chatmode.md": "markdown",
+        "*.prompt.md": "markdown",
+        "*.instructions.md": "markdown"
+    },
+    "files.exclude": {
+        "**/.git": false,
+        "**/__pycache__": false,
+        "**/*.pyc": false,
+        "**/node_modules": false,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true,
+        "**/.venv": false,
+        "**/.History": true
+    },
+
+    // === Search Optimization ===
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true
+    },
+    "search.followSymlinks": false,
+    "search.smartCase": true,
+
+    // === Terminal Enhancements ===
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.fontSize": 13,
+    "terminal.integrated.fontFamily": "Cascadia Code, Consolas, monospace",
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.rightClickBehavior": "default",
+
+    // === Workbench Enhancements ===
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.closeEmptyGroups": true,
+    // (already set above, removed duplicate)
+    "workbench.list.smoothScrolling": true,
+    "workbench.startupEditor": "none",
+    "workbench.iconTheme": "vscode-icons",
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "explorer.compactFolders": false,
+
+    // === Performance Optimizations ===
+    "extensions.autoUpdate": true,
+    "extensions.autoCheckUpdates": true,
+    "telemetry.telemetryLevel": "off",
+    "update.mode": "start",
+    "plantuml.render": "PlantUMLServer",
+    "plantuml.exportFormat": "svg",
+
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "file": "C:\\Users\\jtuttle\\AppData\\Roaming\\Code\\User\\commits\\conventional-commit.instructions.md"
+        }
+    ],
+    "terminal.external.windowsExec": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+    "terminal.explorerKind": "both",
+    "chat.tools.terminal.autoApprove": {
+        "curl": true,
+        "docker": true,
+        "/.*/": true,
+        "$file": true,
+        "$errors": true,
+        "$null": true,
+        "if": true,
+        "ForEach-Object": true,
+        "ssh": true,
+        "uptime": true,
+        "systemctl": true,
+        "pwsh": true,
+        "hostname": true,
+        "ip": true,
+        "sed": true,
+        "pct": true,
+        "cp": true,
+        "mkdir": true,
+        "bash": true,
+        "taskkill": true,
+        "Get-Command": true
+    },
+    "chat.mcp.assisted.nuget.enabled": true,
+
+    // ============================================
+    // 🚀 SUPERCHARGED EXTENSION SETTINGS
+    // ============================================
+
+    // === Anthropic Claude Code (Core AI) ===
+    "claude-code.enableProactive": true,
+    "claude-code.trustWorkspace": true,
+    "claude-code.showWelcome": true,
+
+    // === Conventional Commits Supercharged ===
+    "conventionalCommits.autoCommit": false,
+    "conventionalCommits.lineBreak": "\\n\\n",
+    "conventionalCommits.showEditor": true,
+
+    // === Auto Commit Message ===
+    "autoCommitMsg.languageMap": {
+        "javascript": "JavaScript",
+        "typescript": "TypeScript",
+        "python": "Python",
+        "json": "JSON",
+        "markdown": "Markdown"
+    },
+
+    // === GitHub Actions / Workflow Support ===
+    "github.actions.pinning.enabled": true,
+
+    // === GitHub PR Review ===
+    "github.pullRequests.defaultMergeMethod": "squash",
+    "github.pullRequests.defaultDescription": "auto",
+
+    // === PlantUML Supercharged ===
+    "plantuml.diagramsRoot": "diagrams",
+    "plantuml.exportOutDir": "./diagrams/exports",
+    "plantuml.previewAutoUpdate": true,
+    "plantuml.server": "http://www.plantuml.com/plantuml",
+
+    // === Markdown All-in-One ===
+    "markdown.extension.toc.levels": "1..6",
+    "markdown.extension.toc.orderedList": false,
+    "markdown.extension.toc.updateOnSave": true,
+    "markdown.extension.preview.autoShowPreviewSideBySide": false,
+    "markdown.extension.list.indentationSize": "inherit",
+
+    // === Markdown Mermaid Diagrams ===
+    "markdown.mermaid.theme": "default",
+
+    // === Rainbow CSV ===
+    "rainbow_csv.enable_auto_csv_lint": true,
+    "rainbow_csv.autodetect_separators": ["\t", ",", ";", "|"],
+    "rainbow_csv.csv_lint_detect_trailing_spaces": true,
+    "rainbow_csv.csv_lint_detect_newline_inconsistency": true,
+
+    // === HTML Preview ===
+    "htmlPreview.pageProperties": {
+        "bodyProperties": {
+            "margin": "15px",
+            "padding": "15px"
+        }
+    },
+
+    // === Obsidian Markdown Support ===
+    "obsidianmd.showBacklinks": true,
+    "obsidianmd.wikiLinkEscapeCharacter": "!",
+    "obsidian-md-vsc.BacklinkPrefix": [
+        "BUG:",
+        "CHANGED:",
+        "DEBUG:",
+        "FIXME:",
+        "HACK:",
+        "IDEA:",
+        "NOTE:",
+        "OPTIMIZE:",
+        "RESEARCH:",
+        "REVIEW:",
+        "TEMP:",
+        "TODO:"
+    ],
+
+    // === Remote Containers ===
+    "dev.containers.defaultExtensions": ["ms-python.python", "ms-python.vscode-pylance"],
+
+    // === Todo Highlight Advanced ===
+    "todohighlight.isEnable": true,
+    "todohighlight.toggleURI": true,
+    "todohighlight.isCaseSensitive": false,
+    "todohighlight.keywords": [
+        {
+            "text": "TODO:",
+            "color": "#000",
+            "backgroundColor": "#ffeb3b",
+            "overviewRulerColor": "yellow",
+            "isWholeLine": false
+        },
+        {
+            "text": "FIXME:",
+            "color": "#fff",
+            "backgroundColor": "#f44336",
+            "overviewRulerColor": "red",
+            "isWholeLine": false
+        },
+        {
+            "text": "NOTE:",
+            "color": "#000",
+            "backgroundColor": "#4caf50",
+            "overviewRulerColor": "green",
+            "isWholeLine": false
+        },
+        {
+            "text": "HACK:",
+            "color": "#fff",
+            "backgroundColor": "#ff9800",
+            "overviewRulerColor": "orange",
+            "isWholeLine": false
+        },
+        {
+            "text": "BUG:",
+            "color": "#fff",
+            "backgroundColor": "#e91e63",
+            "overviewRulerColor": "magenta",
+            "isWholeLine": false
+        }
+    ],
+
+    // === NPM Intellisense ===
+    "npm-intellisense.showBuildModules": true,
+    "npm-intellisense.ignoredFolders": ["node_modules", "dist", "build"],
+
+    // === Remote SSH ===
+    // (already set above, removed duplicate)
+    // (already set above, removed duplicate)
+
+    "workbench.colorTheme": "GitHub Dark Dimmed",
+    // === Productivity: Recommend more ===
+    // - Path Intellisense (already installed)
+    // - Markdown Preview Mermaid Support (already installed)
+    // - Docker, WSL, Dev Containers, Remote SSH (already installed)
+    // - GitHub Codespaces, GitHub Actions, GitHub Repositories (already installed)
+    // - Live Server (already installed)
+    // - For future: EditorConfig, Git Blame, GitDoc, Markdown Preview Enhanced, AI/Automation extensions
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "chat.promptFiles": true,
+    "chat.promptFilesLocations": {
+        "./prompts": true
+    },
+    "yaml.schemas": {
+        "file:///c%3A/Users/jtuttle/.vscode/extensions/atlassian.atlascode-4.0.13/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+    },
+    "workbench.editor.tabActionLocation": "left",
+    "atlascode.bitbucket.contextMenus.enabled": false,
+    "atlascode.rovodev.enabled": false,
+    "atlascode.bitbucket.enabled": false,
+    "atlascode.bitbucket.explorer.enabled": false,
+    "atlascode.bitbucket.explorer.nestFilesEnabled": false,
+    "atlascode.bitbucket.explorer.notifications.pullRequestCreated": false,
+    "atlascode.bitbucket.explorer.relatedJiraIssues.enabled": false,
+    "atlascode.bitbucket.explorer.showReviewedPullRequests": false,
+    "atlascode.bitbucket.pipelines.monitorEnabled": false,
+    "atlascode.bitbucket.pipelines.explorerEnabled": false,
+    "atlascode.bitbucket.pipelines.hideEmpty": false,
+    "atlascode.bitbucket.showTerminalLinkPanel": false,
+    "atlascode.bitbucket.statusbar.enabled": false,
+    "atlascode.bitbucket.statusbar.showLogin": false,
+    "atlascode.bitbucket.statusbar.showProduct": false,
+    "atlascode.bitbucket.statusbar.showUser": false,
+    "chat.instructionsFilesLocations": {
+        ".github/instructions": true,
+        "C:\\Users\\jtuttle\\AppData\\Roaming\\Code\\User\\instructions": true,
+        "C:\\Users\\jtuttle\\.aitk\\instructions\\": true
+    },
+    "chat.tools.urls.autoApprove": {
+        "https://git-scm.com/docs/githooks": true,
+        "https://git-scm.com/docs": true,
+        "https://git-scm.com": true,
+        "https://docs.github.com": {
+            "approveResponse": true
+        },
+        "https://stackoverflow.com/questions/4592838/symbolic-link-to-a-hook-in-git": true,
+        "https://stackoverflow.com/questions/4592838": true,
+        "https://stackoverflow.com/questions": true,
+        "https://stackoverflow.com": true,
+        "https://stackoverflow.com/questions/1977610/change-default-git-hooks": true,
+        "https://stackoverflow.com/questions/1977610": true,
+        "https://*.github.com": true,
+        "https://*.visualstudio.com": true,
+        "https://www.google.com": true,
+        "https://*.google.com": true,
+        "https://*.pytest.org": true,
+        "https://github.blog": true,
+        "https://*.python.org": true,
+        "https://*.github.io": true,
+        "https://*.readthedocs.io": true
+    },
+    "chat.viewSessions.orientation": "stacked",
+    "goAutoContinue.message": "continue ",
+    "goAutoContinue.interval": 60
+}
