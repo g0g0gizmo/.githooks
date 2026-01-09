@@ -6,7 +6,8 @@ including JIRA work logging durations, transition names, and service defaults.
 """
 
 # Git Configuration
-BRANCH_REGEX = r"([A-Z]+-\d+)"
+BRANCH_REGEX = r"([A-Z]+-\d+)"  # JIRA ticket pattern (e.g., PROJ-123)
+GITHUB_ISSUE_REGEX = r"(?:issue|gh|#)?-?(\d+)"  # GitHub issue pattern (e.g., issue-123, gh-123, #123)
 DEFAULT_ROOT_BRANCH = "develop"
 
 # JIRA Integration
@@ -53,6 +54,11 @@ GITHUB_PR_BODY_TEMPLATE = """# [{ticket}]({jira_url}/browse/{ticket})
 2. Run automated tests
 3. Verify functionality
 """
+
+# Issue Tracking Types
+ISSUE_TRACKER_JIRA = "jira"
+ISSUE_TRACKER_GITHUB = "github"
+ISSUE_TRACKER_UNKNOWN = "unknown"
 
 # Dependencies
 REQUIRED_DEPENDENCIES = {"jira": "jira", "keyring": "keyring", "PyGithub": "PyGithub"}

@@ -34,7 +34,9 @@
 - ✅ **Python 3.9+**: Modern Python implementation
 - ✅ **Conventional Commits**: Enforces semantic commit messages
 - ✅ **Git Flow Integration**: Automated versioning and branch management
+- ✅ **Dual Issue Tracking**: JIRA and GitHub Issues support (auto-detects from branch names)
 - ✅ **JIRA Integration**: Automatic issue tracking and transitions
+- ✅ **GitHub Issues**: Automatic labeling, comments, and state management
 - ✅ **Code Formatting**: Auto-format with Black, isort, flake8
 - ✅ **Branch Protection**: Prevent commits to main/develop
 - ✅ **Spell Check**: Markdown linting with custom dictionaries
@@ -180,7 +182,27 @@ git config gitflow.prefix.hotfix "hotfix/"
 git config hooks.jira.url "https://your-org.atlassian.net"
 git config hooks.jira.username "your.email@example.com"
 # Password stored securely via keyring (prompted on first use)
+
+# GitHub Issues Integration (optional)
+export GITHUB_TOKEN="ghp_your_token_here"  # For automatic issue updates
 ```
+
+### Issue Tracking Support
+
+The hooks support both JIRA and GitHub Issues, automatically detecting which one to use based on your branch name:
+
+**JIRA Branches:**
+- `JT_PTEAE-2930_feature-description`
+- `PROJ-123_fix-bug`
+- Pattern: `[A-Z]+-\d+`
+
+**GitHub Issue Branches:**
+- `issue-123-description`
+- `gh-123-fix-bug`
+- `123-simple-fix`
+- Pattern: `(?:issue|gh|#)?-?(\d+)`
+
+See [GitHub Issues Integration Guide](docs/GITHUB-ISSUES-INTEGRATION.md) for detailed setup and usage.
 
 **View all hook configuration**:
 
