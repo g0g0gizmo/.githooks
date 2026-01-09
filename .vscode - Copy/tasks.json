@@ -1,0 +1,734 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // ============================================
+        // PYTHON FORMATTING TASKS
+        // ============================================
+        {
+            "label": "Python: Format with Black",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.py",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "black",
+                "$_.FullName",
+                "--line-length=155",
+                "--quiet",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Python: Organize Imports (isort)",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.py",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "isort",
+                "$_.FullName",
+                "--profile=black",
+                "--quiet",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        // ============================================
+        // PYTHON LINTING TASKS
+        // ============================================
+        {
+            "label": "Python: Lint with Pylint",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.py",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "pylint",
+                "$_.FullName",
+                "--max-line-length=155",
+                "--disable=C0111,C0103,R0913,R0914,W0212",
+                "--output-format=parseable",
+                "--reports=n",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^([^:]+):(\\d+): (\\[(\\w+)\\] )(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "group": "test"
+        },
+        {
+            "label": "Python: Type Check with MyPy",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.py",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "mypy",
+                "$_.FullName",
+                "--show-column-numbers",
+                "--show-error-codes",
+                "--no-error-summary",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^([^:]+):(\\d+):(\\d+): (error|warning): (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "group": "test"
+        },
+        {
+            "label": "Python: Dead Code Analysis (Vulture)",
+            "type": "process",
+            "command": "vulture",
+            "args": ["${file}"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": "test"
+        },
+
+        // ============================================
+        // PYTHON SECURITY & ANALYSIS TASKS
+        // ============================================
+
+        // ============================================
+        // PYTHON TESTING TASKS
+        // ============================================
+        {
+            "label": "Python: Run Tests (Pytest)",
+            "type": "process",
+            "command": "pytest",
+            "args": ["${workspaceFolder}/tests", "-v", "--tb=short", "--color=yes"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "pattern": {
+                    "regexp": "^(.*?):(\\d+): (FAILED|ERROR|PASSED)(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "group": "test"
+        },
+        {
+            "label": "Python: Run Tests with Coverage",
+            "type": "process",
+            "command": "pytest",
+            "args": ["${workspaceFolder}/tests", "-v", "--cov=${workspaceFolder}/src", "--cov-report=term-missing", "--tb=short"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        // ============================================
+        // PYTHON COMPOUND TASKS
+        // ============================================
+        {
+            "label": "Python: Quick Format (Black + isort)",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-Command", "isort ${file} --profile=black --quiet; black ${file} --line-length=155 --quiet"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Python: Quality Check All",
+            "dependsOn": ["Python: Organize Imports (isort)", "Python: Format with Black", "Python: Lint with Pylint", "Python: Type Check with MyPy"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+
+        // ============================================
+        // JAVASCRIPT/TYPESCRIPT TASKS
+        // ============================================
+        {
+            "label": "JS/TS: Lint with ESLint",
+            "type": "process",
+            "command": "eslint",
+            "args": ["${file}", "--format=compact"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": "$eslint-compact",
+            "group": "test"
+        },
+        {
+            "label": "JS/TS: Fix with ESLint",
+            "type": "process",
+            "command": "eslint",
+            "args": ["${file}", "--fix", "--format=compact"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "JS/TS: Format with Prettier",
+            "type": "process",
+            "command": "prettier",
+            "args": ["${file}", "--write", "--print-width=155"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        // MARKDOWN LINTING TASKS
+        // ============================================
+        {
+            "label": "Markdown: Lint with Markdownlint",
+            "type": "process",
+            "command": "markdownlint",
+            "args": ["${file}"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": {
+                "owner": "markdown",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^([^:]+):(\\d+):(\\d+) (MD\\d+) (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "code": 4,
+                    "message": 5
+                }
+            },
+            "group": "test"
+        },
+        {
+            "label": "Markdown: Fix with Markdownlint",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.md",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "markdownlint",
+                "$_.FullName",
+                "--fix",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Markdown: Lint Workspace",
+            "type": "shell",
+            "command": "Get-ChildItem",
+            "args": [
+                "-Path",
+                "${workspaceFolder}",
+                "-Filter",
+                "*.md",
+                "-Recurse",
+                "-File",
+                "-Exclude",
+                "*History*",
+                "|",
+                "Where-Object",
+                "{",
+                "$_.FullName",
+                "-notmatch",
+                "'History'",
+                "}",
+                "|",
+                "ForEach-Object",
+                "{",
+                "markdownlint",
+                "$_.FullName",
+                "}"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "markdown",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^([^:]+):(\\d+):(\\d+) (MD\\d+) (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "code": 4,
+                    "message": 5
+                }
+            },
+            "group": "test"
+        },
+        {
+            "label": "Markdown: Quality Check All",
+            "dependsOn": ["Markdown: Lint Workspace", "Markdown: Fix with Markdownlint"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+
+        // ============================================
+        // JSON & YAML FORMATTING TASKS
+        // ============================================
+        {
+            "label": "JSON: Format with Prettier",
+            "type": "process",
+            "command": "prettier",
+            "args": ["${file}", "--write", "--parser=json", "--print-width=155"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "YAML: Format with Prettier",
+            "type": "process",
+            "command": "prettier",
+            "args": ["${file}", "--write", "--parser=yaml", "--print-width=155"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Format: All Files (JSON, YAML, JS/TS)",
+            "type": "process",
+            "command": "prettier",
+            "args": ["${workspaceFolder}", "--write", "--print-width=155"],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        {
+            "label": "JS/TS: TypeScript Compile",
+            "type": "process",
+            "command": "tsc",
+            "args": ["--noEmit"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": "$tsc",
+            "group": "test"
+        },
+        {
+            "label": "JS/TS: Run Jest Tests",
+            "type": "process",
+            "command": "jest",
+            "args": ["--verbose", "--colors", "--coverage"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": "test"
+        },
+
+        // ============================================
+        // NPM/BUILD TASKS
+        // ============================================
+        {
+            "label": "NPM: Build",
+            "type": "process",
+            "command": "npm",
+            "args": ["run", "build"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": "$eslint-compact",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "NPM: Test",
+            "type": "process",
+            "command": "npm",
+            "args": ["run", "test"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": "test"
+        },
+        {
+            "label": "NPM: Watch (dev mode)",
+            "type": "process",
+            "command": "npm",
+            "args": ["run", "dev"],
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Starting dev server.*$",
+                    "endsPattern": "^.*ready.*$"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        // ============================================
+        // GIT & COMMIT TASKS
+        // ============================================
+        {
+            "label": "Git: Run Pre-commit Checks",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-Command", "Write-Host 'Running pre-commit validation...'; npm run lint; pytest tests/; Write-Host 'Pre-commit checks passed!'"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": "test"
+        },
+
+        // ============================================
+        // DOCKER & CONTAINER TASKS
+        // ============================================
+        {
+            "label": "Docker: Build Image",
+            "type": "process",
+            "command": "docker",
+            "args": ["build", "-t", "${workspaceFolderBasename}:latest", "."],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Docker: Run Container",
+            "type": "process",
+            "command": "docker",
+            "args": ["run", "-it", "${workspaceFolderBasename}:latest"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+        // ============================================
+        // UTILITY TASKS
+        // ============================================
+        {
+            "label": "Clean: Remove Python Cache",
+            "type": "process",
+            "command": "pwsh",
+            "args": [
+                "-Command",
+                "Get-ChildItem -Path '${workspaceFolder}' -Directory -Recurse -Filter '__pycache__' | Remove-Item -Force -Recurse; Get-ChildItem -Path '${workspaceFolder}' -Recurse -Filter '*.pyc' | Remove-Item -Force; Write-Host 'Python cache cleaned!'"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Clean: Remove node_modules",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-Command", "Remove-Item -Force -Recurse '${workspaceFolder}/node_modules'; Write-Host 'node_modules removed!'"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Show: Environment Info",
+            "type": "process",
+            "command": "pwsh",
+            "args": [
+                "-Command",
+                "Write-Host '=== Node & NPM ==='; node --version; npm --version; Write-Host '=== Python ==='; python --version; Write-Host '=== Tools ==='; black --version; isort --version; flake8 --version; pylint --version"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "VSCode: Export Extensions to Root",
+            "type": "process",
+            "command": "pwsh",
+            "args": [
+                "-Command",
+                "code --list-extensions | ConvertTo-Json | Set-Content -Encoding UTF8 '${workspaceFolder}/.vscode/extensions.json'; Write-Host 'Extensions exported to extensions.json'"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        }
+    ]
+}

@@ -22,29 +22,19 @@ These instructions enforce direct, integration-style testing. This means:
 - **Test real side effects:** If your code writes files, updates state, or interacts with the environment, verify those effects directly.
 - **Use fixtures for setup/teardown:** Use pytest fixtures for setup and teardown, but keep them minimal and avoid patching.
 - **Keep tests readable and maintainable:** Use clear function names, docstrings, and comments to explain intent.
-- **Always document tests:** Every test module must start with a module-level docstring explaining what is being verified, and every test function must include a short docstring describing the scenario and expected behavior.
 
 ## Test Structure
 
 - Place all test files in the `tests/` directory, mirroring the source structure when possible.
 - Name test files as `test_<module>.py` and test functions as `test_<functionality>()`.
 - Group related tests in classes only if shared setup/teardown is required.
-- Begin each test file with a concise module docstring that summarizes the focus of the tests.
-- Include a brief docstring on each test function outlining the setup, action, and expected outcome.
 
 ## Example Test Pattern
 
 ```python
 # tests/test_example.py
 
-"""
-Tests for basic arithmetic operations.
-
-Verifies simple addition to demonstrate required module docstrings in tests.
-"""
-
 def test_addition():
-    """Addition yields correct result for small integers."""
     assert 1 + 1 == 2
 ```
 
@@ -63,7 +53,6 @@ def sample_data():
 # tests/test_with_fixture.py
 
 def test_sum(sample_data):
-    """Sum computes total of provided iterable."""
     assert sum(sample_data) == 10
 ```
 

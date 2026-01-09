@@ -1,0 +1,79 @@
+{
+    // Multi-language debug configurations for Python, Node.js, and more
+    "version": "0.2.0",
+    "configurations": [
+        // --- Python: Current File ---
+        {
+            "name": "Python: Current File (Integrated Terminal)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        // --- Python: Attach to Process ---
+        {
+            "name": "Python: Attach to Process",
+            "type": "debugpy",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "justMyCode": true
+        },
+        // --- Node.js: Launch Program ---
+        {
+            "name": "Node.js: Launch Program",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        },
+        // --- Node.js: Attach to Process ---
+        {
+            "name": "Node.js: Attach to Process",
+            "type": "node",
+            "request": "attach",
+            "processId": "${command:PickProcess}",
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+        },
+        // --- Node.js: Launch via npm script ---
+        {
+            "name": "Node.js: Launch via npm script",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        },
+        // --- Docker: Python (Attach) ---
+        {
+            "name": "Docker: Attach to Python",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/app"
+                }
+            ]
+        },
+        // --- Docker: Node.js (Attach) ---
+        {
+            "name": "Docker: Attach to Node.js",
+            "type": "node",
+            "request": "attach",
+            "address": "localhost",
+            "port": 9229,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app"
+        }
+    ]
+}
