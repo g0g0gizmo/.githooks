@@ -1,8 +1,8 @@
-## pre commit 
+## pre commit
 
 This hook is called before obtaining the proposed commit message. Exiting with anything other than zero will abort the commit. It is used to check the commit itself (rather than the message).
 
-## invoked by 
+## invoked by
 
 ```bash
 git commit
@@ -10,15 +10,16 @@ git commit
 
 ## pre commit git hooks for:
 
-* **dotenvx.hook** - Environment variable validation hook
-* **format-code.hook** - Code formatting hook  
-* **search-term.hook** - Search for prohibited terms in code
-* **spell-check-md-files.hook** - Spell check markdown files
-* **verify-name-and-email.hook** - Verify Git user name and email configuration
+* **dotenvx.hook.disabled** - Environment variable validation (requires dotenvx CLI - disabled by default)
+* **search-term.hook** - Search for prohibited terms and patterns in staged files
+* **spell-check-md-files.hook.disabled** - Spell check markdown files (requires pyspellchecker - disabled by default)
+* **verify-name-and-email.hook** - Verify Git user name and email are properly configured
+* **prevent-commit-to-main-or-develop.hook** - Prevent direct commits to protected branches
+* **dispatcher.hook** - Auto-generated dispatcher that runs all .hook files in sequence
 
 ## support
 
-If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new). 
+If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new).
 
 ## license
 

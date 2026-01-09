@@ -1,8 +1,8 @@
-## applypatch-msg 
+## applypatch-msg
 
 Can edit the commit message file and is often used to verify or actively format a patch's message to a project's standards. A non-zero exit status aborts the commit.
 
-## invoked by 
+## invoked by
 
 ```bash
 git am
@@ -14,7 +14,7 @@ git am
 
 ## support
 
-If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new). 
+If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new).
 
 ## license
 

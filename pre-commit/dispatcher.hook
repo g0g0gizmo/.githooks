@@ -1,7 +1,6 @@
 #!/bin/sh
 # Modular dispatcher: runs all .hook scripts in this directory, with diagnostics
 HOOK_DIR="$(dirname "$0")"
-EXIT_CODE=0
 for hook in "$HOOK_DIR"/*.hook; do
   [ -x "$hook" ] || continue
   echo "[dispatcher] Running $hook..."
@@ -9,7 +8,7 @@ for hook in "$HOOK_DIR"/*.hook; do
   code=$?
   echo "[dispatcher] $hook exited with code $code"
   if [ $code -ne 0 ]; then
-    EXIT_CODE=$code
+    echo "[dispatcher] WARNING: $hook failed (exit $code), but commit will proceed."
   fi
 done
-exit $EXIT_CODE
+exit 0

@@ -1,8 +1,8 @@
-## pre-rebase 
+## pre-rebase
 
 Called when rebasing a branch. Mainly used to halt the rebase if it is not desirable.
 
-## invoked by 
+## invoked by
 
 ```bash
 git rebase
@@ -14,7 +14,7 @@ git rebase
 
 ## support
 
-If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new). 
+If you have a question, find a bug, or just want to say hi, please open an [issue on GitHub](https://github.com/aitemr/awesome-git-hooks/issues/new).
 
 ## license
 

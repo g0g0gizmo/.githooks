@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""
+Git post-checkout hook to transition Jira tickets and log work automatically.
+Uses gojira.Client patterns for consistent authentication and API access.
+"""
+import sys
+from pathlib import Path
+
+# Add githooks package to Python path so we can import from it
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+import os
+import re
+import subprocess
+from datetime import datetime
+from typing import Optional, Tuple
+
+# Configuration
+BRANCH_REGEX = r"([A-Z]+-\d+)"
+SERVICE_NAME = "gojira"
+DEFAULT_TIME_SPENT = "5m"
+DEFAULT_SERVER = os.getenv("JIRA_SERVER", "https://jira.viasat.com")
+REQUIRED_DEPENDENCIES = {"jira": "jira", "keyring": "keyring", "typer": "typer"}
+
+
+def ensure_dependencies():
+    """Ensure required dependencies are installed."""
+    missing = []
+
+    for module, package in REQUIRED_DEPENDENCIES.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+
+    if missing:
+        print(f"[INFO] Installing missing dependencies: {', '.join(missing)}")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet"] + missing)
+            print("[OK] Dependencies installed successfully")
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] Failed to install dependencies: {e}", file=sys.stderr)
+            sys.exit(1)
+
+
+# Ensure dependencies before importing
+ensure_dependencies()
+
+import keyring
+
+# Import third-party dependencies after ensuring they're installed
+# pylint: disable=wrong-import-position
+import typer
+from jira import JIRA
+
+
+def parse_ticket_from_branch(branch: str) -> Optional[str]:
+    """
+    Extract Jira ticket ID from branch name.
+
+    Args:
+        branch: Git branch name (e.g., 'feature/PROJ-123-add-feature')
+
+    Returns:
+        Ticket ID (e.g., 'PROJ-123') or None if not found
+    """
+    match = re.search(BRANCH_REGEX, branch)
+    return match.group(1) if match else None
+
+
+def get_jira_client() -> Optional[JIRA]:
+    """Create and authenticate a Jira client."""
+    try:
+        username = os.environ.get("JIRA_USERNAME") or os.environ.get("GOJIRA_USERNAME")
+        password = os.environ.get("JIRA_TOKEN") or os.environ.get("GOJIRA_SECRET")
+
+        if not username:
+            username = keyring.get_password(f"{SERVICE_NAME}.jira.username", "username")
+        if not password:
+            password = keyring.get_password(f"{SERVICE_NAME}.jira.password", "password")
+
+        if not username:
+            username = input("Enter your Jira username/email: ")
+            keyring.set_password(f"{SERVICE_NAME}.jira.username", "username", username)
+        if not password:
+            keyring.set_password(f"{SERVICE_NAME}.jira.password", "password", typer.prompt("Enter Jira password: ", hide_input=True))
+
+        return JIRA(server=DEFAULT_SERVER, basic_auth=(username, password))
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f"[ERROR] Failed to create Jira client: {e}", file=sys.stderr)
+        return None
+
+
+def transition_and_log_work(jira: JIRA, ticket: str, branch_name: str, time_spent: str = "5m") -> Tuple[bool, Optional[str]]:
+    """Transition ticket to 'In Progress' and log work."""
+    try:
+        comment = f"Started work on {branch_name}"
+        issue = jira.issue(ticket)
+
+        # Add worklog first
+        jira.add_worklog(issue, timeSpent=time_spent, comment=comment)
+
+        # Transition to "In Progress"
+        transitions = jira.transitions(issue)
+        open_transition = next((t for t in transitions if "open" in t["name"].lower()), None)
+        if open_transition:
+            jira.transition_issue(issue, open_transition["id"])
+            transitions = jira.transitions(issue)
+
+        in_progress = next((t for t in transitions if "progress" in t["name"].lower()), None)
+        if in_progress:
+            jira.transition_issue(issue, in_progress["id"])
+
+        return True, None
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        return False, f"Failed to transition/log work: {e}"
+
+
+if __name__ == "__main__":
+    """Main entry point for post-checkout hook."""
+    # if len(sys.argv) < 2:
+    #     print("Usage: python jira_transition_worklog.py <branch_name>", file=sys.stderr)
+    #     sys.exit(1)
+
+    # Only run this hook if the checkout is to a branch
+    if not os.getenv("GIT_CHECKOUT_BRANCH"):
+        sys.exit(0)
+
+    branch = "develop-feature/JT_OMLEG-3169_reverse_proxy_login_to_oracle"  # sys.argv[1]
+    ticket = parse_ticket_from_branch(branch)
+
+    if not ticket:
+        sys.exit(0)
+
+    # Create Jira client and process ticket
+    jira_client = get_jira_client()
+    if not jira_client:
+        print("[ERROR] Failed to create Jira client", file=sys.stderr)
+        sys.exit(1)
+
+    success, error = transition_and_log_work(jira_client, ticket, branch)
+
+    if success:
+        print(f"[OK] {ticket}: Transitioned to 'In Progress' and logged work")
+        sys.exit(0)
+    else:
+        print(f"[ERROR] {ticket}: {error}", file=sys.stderr)
+        sys.exit(1)

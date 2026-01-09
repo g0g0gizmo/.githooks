@@ -1,0 +1,33 @@
+"""
+Tests for commit-msg-smart-commit.hook.
+
+Verifies importability of the commit-msg-smart-commit.hook Python script.
+"""
+
+import os
+
+import pytest
+
+from tests.conftest import load_hook_module
+
+HOOK_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../commit-msg/commit-msg-smart-commit.hook")).replace("\\", "/")
+
+
+def test_hook_exists():
+    """Hook script should exist in commit-msg directory."""
+    assert os.path.isfile(HOOK_PATH)
+
+
+def test_hook_importable(load_hook_module):
+    """Hook script should be importable as a Python module (if Python)."""
+    with open(HOOK_PATH, encoding="utf-8") as f:
+        first_line = f.readline()
+    if not (first_line.startswith("#!/usr/bin/env python") or first_line.startswith("#!/usr/bin/python")):
+        pytest.skip("Not a Python script; skipping import test.")
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("hook_module", HOOK_PATH)
+    if spec is None or spec.loader is None:
+        pytest.skip("Could not load Python module spec; skipping import test.")
+    load_hook_module(HOOK_PATH)
+    # Should not raise
