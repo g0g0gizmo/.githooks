@@ -1,5 +1,6 @@
 ---
 description: 'Five design principles for modular, flexible, and maintainable code'
+applyTo: '**/*'
 ---
 
 # SOLID Principles
@@ -60,6 +61,7 @@ class EmailSender {
 ```
 
 **Quick Test**: Can I describe the class in one sentence without "and"?
+
 - ✅ Yes: "UserService creates users"
 - ❌ No: "UserService creates users and validates emails and hashes passwords"
 
@@ -114,6 +116,7 @@ class PaymentProcessor {
 ```
 
 **Quick Test**: Can I add a feature without touching existing code?
+
 - ✅ Yes: Create new class implementing interface
 - ❌ No: Must edit existing classes/conditionals
 
@@ -169,6 +172,7 @@ function moveAnimal(animal: Animal) {
 ```
 
 **Quick Test**: If B extends A, can I use B everywhere A is expected?
+
 - ✅ Yes: Substitution works properly
 - ❌ No: Violates principle, creates bugs
 
@@ -225,6 +229,7 @@ class Robot implements Workable {
 ```
 
 **Quick Test**: Does the implementation need every method in the interface?
+
 - ✅ Yes: Interface is properly segregated
 - ❌ No: Interface is too fat, split it
 
@@ -297,6 +302,7 @@ const testService = new UserService(new MockDatabase());
 ```
 
 **Quick Test**: Can I swap implementations without changing the dependent code?
+
 - ✅ Yes: Depends on abstraction
 - ❌ No: Depends on concrete class
 
@@ -344,10 +350,10 @@ Ask for each principle:
 
 ## Related Principles
 
-- [Design by Contract](../../.github/copilot/instructions/design-by-contract.instructions.md) - SOLID builds on contract-based design
-- [DRY Principle](../../.github/copilot/instructions/dry-principle.instructions.md) - SOLID avoids repeating responsibility patterns
-- [KISS Principle](../../.github/copilot/instructions/kiss-principle.instructions.md) - SOLID achieves simplicity through separation of concerns
-- [Code Quality Goals](../../.github/copilot/instructions/code-quality-goals.instructions.md) - SOLID improves all quality dimensions
+- Design by Contract - clear interfaces make substitution and boundaries safer
+- DRY - separating responsibilities reduces duplicated implementations
+- KISS - focused responsibilities make systems simpler
+- Code quality goals - SOLID tends to improve testability and maintainability
 
 ---
 

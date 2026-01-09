@@ -1,5 +1,6 @@
 ---
 description: 'Break complex problems into smaller, manageable subproblems that are easier to solve'
+applyTo: '**/*'
 ---
 
 # Problem Decomposition - Break Complex Problems Into Solvable Parts
@@ -205,7 +206,7 @@ function searchTree<T>(node: TreeNode<T>, target: T): boolean {
 
 #### Step 1: Understand the Problem
 
-```
+```text
 Questions to ask:
 - What exactly are we solving?
 - What are inputs and outputs?
@@ -224,7 +225,7 @@ Problem: "Sort an array of numbers"
 
 #### Step 2: Identify Problem Structure
 
-```
+```text
 Patterns to recognize:
 - Sequential? → Use sequential decomposition
 - Different cases? → Use case analysis
@@ -240,7 +241,7 @@ Sorting problem structure:
 
 #### Step 3: Choose Decomposition Technique
 
-```
+```text
 Decision tree:
 - If steps depend on each other → sequential
 - If cases are independent → case analysis
@@ -256,7 +257,7 @@ Sorting:
 
 #### Step 4: Solve Subproblems
 
-```
+```text
 Focus on:
 - Clear interface for each subproblem
 - Minimum necessary logic
@@ -266,7 +267,7 @@ Focus on:
 
 #### Step 5: Combine Solutions
 
-```
+```text
 Recombination step:
 - How do subproblem solutions combine?
 - What's the recombination logic?
@@ -275,7 +276,7 @@ Recombination step:
 
 #### Step 6: Verify Solution
 
-```
+```text
 Testing:
 - Does each subproblem work?
 - Does recombination work?
@@ -287,9 +288,9 @@ Testing:
 
 ## Related Principles
 
-- [SOLID Principles](../../.github/instructions/solid-principles.instructions.md) - Single Responsibility supports decomposition
-- [KISS Principle](./kiss-principle.instructions.md) - Simple subproblems are easier to understand
-- [Orthogonality](./orthogonality.instructions.md) - Independent subproblems are orthogonal
+- SOLID principles - SRP supports focused subproblems
+- KISS - simple subproblems are easier to understand and test
+- Orthogonality - independent subproblems interfere less
 
 ---
 
