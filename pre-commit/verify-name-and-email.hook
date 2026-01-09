@@ -7,27 +7,28 @@
 # The hook should exit with non-zero status after issuing an appropriate
 # message if it stops the commit.
 #
-# Requirements: 
+# Requirements:
 #   * Bash
 #
 # To enable this hook, rename this file to "pre-commit".
 
-# Make sure user.name is set properly
+# Make sure user.name is set
 username=$(git config user.name)
-if [ "$username" != "Lauren Stephenson" ]
+if [ -z "$username" ]
 then
-    cat <<\EOF
-Error: user.name not set to "Lauren Stephenson"
-EOF
-    exit 1
+  msg="Error: user.name is not set. Please configure it with: git config user.name 'Your Name'"
+  echo "$msg"
+  # Show popup cross-platform
+  python3 "$(dirname "$0")/../popup_error.py" "$msg" "Git Hook Error"
+  exit 1
 fi
 
-# Make sure user.email is set properly
+# Make sure user.email is set
 email=$(git config user.email)
-if [ "$email" != "compscilauren@gmail.com" ]
+if [ -z "$email" ]
 then
-    cat <<\EOF
-Error: user.email not set to "compscilauren@gmail.com"
-EOF
-    exit 1
+  msg="Error: user.email is not set. Please configure it with: git config user.email 'your.email@example.com'"
+  echo "$msg"
+  python3 "$(dirname "$0")/../popup_error.py" "$msg" "Git Hook Error"
+  exit 1
 fi

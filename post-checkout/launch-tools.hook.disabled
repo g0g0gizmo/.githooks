@@ -1,0 +1,421 @@
+#!/usr/bin/env python
+"""
+launchpad.py - Utility functions for launching dev tools and managing project setup.
+
+Provides helpers for launching VS Code, GitKraken, running installs, and fetching GIFs.
+"""
+
+import logging
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from random import choice, randint
+from typing import Optional, Union
+
+import requests
+
+# Configure logging
+# Configure logging
+app_logger = logging.getLogger(__name__)
+
+
+def find_executable(executable: str) -> str:
+    """
+    Find the full path to an executable using 'where' (Windows) or shutil.which as fallback.
+
+    Args:
+        executable (str): The name of the executable to find.
+
+    Returns:
+        str | None: The path to the executable, or None if not found.
+    """
+    try:
+        # Try using 'where' on Windows
+        result = subprocess.run(["where", executable], capture_output=True, text=True, check=False)
+        if result.returncode == 0 and result.stdout:
+            return result.stdout.strip().split("\n")[0]
+        return ""
+    except Exception:
+        return shutil.which(executable) or ""
+
+
+def find_gif(branch_name: str = "JT-OMLEG-1733_close_previous_pwow_sessions", search_term: str = "", limit: int = 1) -> str | None:
+    """
+    Find a GIF URL from Giphy based on a branch name or search term.
+
+    Args:
+        branch_name (str): The branch name to derive search keywords from.
+        search_term (str): Optional search term to override random selection.
+        limit (int): Number of results to fetch from Giphy.
+
+    Returns:
+        str | None: The URL of a found GIF, or None if not found.
+    """
+    # keywords = branch_name.split("_")  # Unused
+    randy_search = [
+        "programmer funny",
+        "coding",
+        "programming",
+        "debugging",
+        "developer",
+        "software engineer",
+        "code",
+        "hack",
+        "git",
+        "fix",
+        "merge",
+        "pull request",
+        "commit",
+        "version control",
+        "bug fix",
+        "feature",
+        "refactor",
+        "deploy",
+        "build",
+        "test",
+        "review",
+        "computer",
+    ]
+
+    search_term = search_term or choice(randy_search)
+    endpoint = "https://api.giphy.com/v1/gifs/search"
+    params = {
+        "api_key": "fKzMMw8KYTeQNQwMTudmMQUqLcQUDeEX",
+        "q": search_term,
+        "limit": limit,
+        "offset": randint(0, max(0, limit - 1)),
+    }
+    try:
+        response = requests.get(endpoint, params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("data"):
+                gif_url = data["data"][randint(0, len(data["data"]) - 1)]["url"]
+                return gif_url
+        app_logger.error("Failed to find gif for %s", search_term)
+    except requests.RequestException as exc:
+        app_logger.error("Exception while fetching gif: %s", exc)
+    return None
+
+
+def run_command(command: list[str], cwd: Optional[Union[str, Path]] = None) -> str:
+    """
+    Run a shell command and return its output.
+
+    Args:
+        command (list[str]): The command and arguments to run.
+        cwd (str | Path, optional): Directory to run the command in.
+
+    Returns:
+        str: The standard output from the command.
+
+    Raises:
+        SystemExit: If the command fails (for compatibility with callers that expect this).
+    """
+    try:
+        result = subprocess.run(command, check=True, cwd=cwd, capture_output=True, text=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as exc:
+        app_logger.error("Failed to run command %s: %s", " ".join(command), exc)
+        # Raise SystemExit instead of calling sys.exit to allow catching
+        raise SystemExit(1)
+
+
+def launch_vscode(clone_path: str | Path) -> None:
+    """
+    Launch Visual Studio Code in the given directory.
+
+    Args:
+        clone_path (str | Path): The path to open in VS Code.
+    """
+    try:
+        exe_path = find_executable("code")
+        if not exe_path:
+            raise FileNotFoundError("VS Code executable not found")
+        exe_path = Path(str(exe_path).replace("bin\\code.cmd", "Code.exe"))
+        if not exe_path.exists():
+            raise FileNotFoundError(f"VS Code executable does not exist at {exe_path}")
+        app_logger.info("Launching VS Code at %s in %s", exe_path, clone_path)
+        try:
+            subprocess.Popen([str(exe_path), "-n", str(clone_path)], shell=True)
+        except OSError as os_err:
+            # Handle "not a valid Win32 application" and similar OS-level errors
+            app_logger.warning("OS error launching VS Code (possibly invalid executable): %s", os_err)
+    except FileNotFoundError as fnf_err:
+        app_logger.warning("VS Code executable not found: %s", fnf_err)
+    except Exception as exc:
+        app_logger.error("Failed to launch VS Code: %s", exc)
+        # Don't exit - just log the error and continue
+
+
+def run_poetry_install(clone_path: str | Path) -> None:
+    """
+    Find and run 'poetry install' in the directory containing pyproject.toml.
+
+    Args:
+        clone_path (str | Path): The root directory to search for pyproject.toml.
+    """
+    try:
+        toml_file = next(Path(clone_path).rglob("pyproject.toml"), None)
+        toml_file_location = toml_file.parent if toml_file else None
+        if toml_file_location:
+            print(f"Found pyproject.toml at {toml_file_location}")
+            poetry_path = find_executable("poetry")
+            if not poetry_path:
+                raise FileNotFoundError("Poetry executable not found")
+            try:
+                subprocess.Popen([poetry_path, "install"], cwd=toml_file_location, shell=True)
+            except OSError as os_err:
+                # Handle "not a valid Win32 application" and similar OS-level errors
+                app_logger.warning("OS error running poetry install (possibly invalid executable): %s", os_err)
+        else:
+            app_logger.error("pyproject.toml file not found")
+    except FileNotFoundError as fnf_err:
+        app_logger.warning("Poetry executable not found: %s", fnf_err)
+    except Exception as exc:
+        app_logger.error("Failed to run poetry install: %s", exc)
+        # Don't exit - just log the error and continue
+
+
+def run_npm_install(clone_path: str | Path) -> None:
+    """
+    Recursively search for a 'package.json' file and run 'npm install' in its directory.
+
+    Args:
+        clone_path (str | Path): The root directory to search for 'package.json'.
+    """
+    try:
+        package_json_location = next(Path(clone_path).rglob("package.json"), None)
+        if package_json_location:
+            print(f"Found package.json at {package_json_location}")
+            npm_path = find_executable("npm")
+            if not npm_path:
+                raise FileNotFoundError("npm executable not found")
+            try:
+                subprocess.Popen([npm_path, "install"], cwd=package_json_location.parent, shell=True)
+            except OSError as os_err:
+                # Handle "not a valid Win32 application" and similar OS-level errors
+                app_logger.warning("OS error running npm install (possibly invalid executable): %s", os_err)
+        else:
+            app_logger.error("package.json file not found")
+    except FileNotFoundError as fnf_err:
+        app_logger.warning("npm executable not found: %s", fnf_err)
+    except Exception as exc:
+        app_logger.error("Failed to run npm install: %s", exc)
+
+
+def run_pip_install(clone_path: str | Path, pyproject_mode: bool = False) -> None:
+    """
+    Find and run 'pip install -r requirements.txt' or 'pip install -e .' for pyproject.toml (PEP 517/518).
+
+    Args:
+        clone_path (str | Path): The root directory to search for requirements.txt or pyproject.toml.
+        pyproject_mode (bool): If True, install using 'pip install -e .' in the pyproject.toml directory.
+    """
+    try:
+        if pyproject_mode:
+            toml_file = next(Path(clone_path).rglob("pyproject.toml"), None)
+            if toml_file:
+                pip_path = find_executable("pip")
+                if not pip_path:
+                    raise FileNotFoundError("pip executable not found")
+                print(f"Found pyproject.toml at {toml_file.parent} (pip editable mode)")
+                try:
+                    subprocess.Popen([pip_path, "install", "-e", "."], cwd=toml_file.parent, shell=True)
+                except OSError as os_err:
+                    # Handle "not a valid Win32 application" and similar OS-level errors
+                    app_logger.warning("OS error running pip install (possibly invalid executable): %s", os_err)
+                return
+            else:
+                app_logger.error("pyproject.toml file not found for pip editable install")
+                return
+        req_file = next(Path(clone_path).rglob("requirements.txt"), None)
+        req_file_location = req_file.parent if req_file else None
+        if req_file_location:
+            print(f"Found requirements.txt at {req_file_location}")
+            pip_path = find_executable("pip")
+            if not pip_path:
+                raise FileNotFoundError("pip executable not found")
+            try:
+                subprocess.Popen([pip_path, "install", "-r", str(req_file)], cwd=req_file_location, shell=True)
+            except OSError as os_err:
+                # Handle "not a valid Win32 application" and similar OS-level errors
+                app_logger.warning("OS error running pip install (possibly invalid executable): %s", os_err)
+        else:
+            app_logger.error("requirements.txt file not found")
+    except FileNotFoundError as fnf_err:
+        app_logger.warning("pip executable not found: %s", fnf_err)
+    except Exception as exc:
+        app_logger.error("Failed to run pip install: %s", exc)
+
+
+def _pyproject_uses_poetry(pyproject_path: Path) -> bool:
+    """
+    Check if pyproject.toml contains a [tool.poetry] section.
+    """
+    try:
+        with open(pyproject_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if re.match(r"\s*\[tool.poetry\]", line):
+                    return True
+    except Exception:
+        pass
+    return False
+
+
+def install_environment(clone_path: str | Path) -> None:
+    """
+    Detect and install project dependencies using npm, poetry, or pip as appropriate.
+
+    Args:
+        clone_path (str | Path): The root directory to search for environment files.
+    """
+    # NPM (Node.js)
+    package_json = next(Path(clone_path).rglob("package.json"), None)
+    if package_json:
+        run_npm_install(clone_path)
+        return
+
+    # Python: pyproject.toml (Poetry or PEP 517/518)
+    pyproject_toml = next(Path(clone_path).rglob("pyproject.toml"), None)
+    if pyproject_toml:
+        if _pyproject_uses_poetry(pyproject_toml):
+            run_poetry_install(clone_path)
+            return
+        else:
+            # If requirements.txt exists, prefer that for pip
+            requirements_txt = next(Path(clone_path).rglob("requirements.txt"), None)
+            if requirements_txt:
+                run_pip_install(clone_path)
+                return
+            # Otherwise, use pip install -e . for editable install
+            run_pip_install(clone_path, pyproject_mode=True)
+            return
+
+    # Pip (Python) fallback
+    requirements_txt = next(Path(clone_path).rglob("requirements.txt"), None)
+    if requirements_txt:
+        run_pip_install(clone_path)
+        return
+
+    app_logger.error("No recognized environment file found (package.json, pyproject.toml, requirements.txt)")
+
+
+def launch_gitkraken(clone_path: str | Path) -> None:
+    """
+    Launch GitKraken in the given directory.
+
+    Args:
+        clone_path (str | Path): The path to open in GitKraken.
+    """
+    try:
+        gitkraken_path = run_command(["where", "gitkraken"])
+        try:
+            subprocess.Popen([str(gitkraken_path), "-p", str(clone_path)])
+        except OSError as os_err:
+            # Handle "not a valid Win32 application" and similar OS-level errors
+            app_logger.warning("OS error launching GitKraken (possibly invalid executable): %s", os_err)
+    except SystemExit:
+        app_logger.warning("GitKraken executable not found")
+    except Exception as exc:
+        app_logger.error("Failed to launch gitkraken: %s", exc)
+        # Don't exit - just log the error and continue
+
+
+def launch_dev_tools(clone_path: str | Path) -> None:
+    """
+    Launch both GitKraken and VS Code in the given directory.
+
+    Args:
+        clone_path (str | Path): The path to open in both tools.
+    """
+    try:
+        launch_gitkraken(clone_path)
+        launch_vscode(clone_path)
+    except Exception as exc:
+        app_logger.error("Failed to launch dev tools: %s", exc)
+        # Don't exit - just log the error and continue
+
+
+def get_git_clone_root(start: Optional[Union[str, Path]] = None) -> Path:
+    """
+    Resolve the Git clone root directory using git config and rev-parse.
+
+    Tries `git rev-parse --show-toplevel` from the provided start directory (or CWD),
+    falling back to the current working directory if Git metadata is unavailable.
+    """
+    base = Path(start) if start else Path.cwd()
+    try:
+        out = run_command(["git", "rev-parse", "--show-toplevel"], cwd=base)
+        if out:
+            return Path(out)
+    except SystemExit:
+        pass
+    return base
+
+
+def get_git_branch(start: Optional[Union[str, Path]] = None) -> str:
+    """
+    Resolve the current Git branch name using `git rev-parse --abbrev-ref HEAD`.
+    Returns an empty string if not in a Git repo.
+    """
+    base = Path(start) if start else Path.cwd()
+    try:
+        out = run_command(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=base)
+        return out
+    except SystemExit:
+        return ""
+
+
+def find_and_print_files(root_path: Path, filenames: list[str]) -> None:
+    """
+    Recursively search for given filenames from root_path and print their paths if found.
+    """
+    for fname in filenames:
+        found = list(root_path.rglob(fname))
+        if found:
+            for f in found:
+                print(f"Found {fname}: {f}")
+        else:
+            print(f"{fname} not found under {root_path}")
+
+
+if __name__ == "__main__":
+    try:
+        # Debug: Log environment and arguments
+        import sys
+
+        app_logger.debug("Arguments: %s", sys.argv)
+        app_logger.debug("GIT_CHECKOUT_BRANCH: %s", os.environ.get("GIT_CHECKOUT_BRANCH"))
+
+        # Check if the GIT_CHECKOUT_BRANCH environment variable is set
+        if not os.environ.get("GIT_CHECKOUT_BRANCH"):
+            app_logger.warning("GIT_CHECKOUT_BRANCH is not set. Skipping launch-tools.")
+            sys.exit(0)  # Exit gracefully, don't block
+
+        # Determine clone root and branch via Git
+        clone_root = get_git_clone_root()
+        branch = get_git_branch(clone_root)
+        print(f"Clone root: {clone_root}")
+        if branch:
+            print(f"Branch: {branch}")
+
+        # Launch dev tools (GitKraken + VS Code)
+        launch_dev_tools(clone_root)
+
+        # Search for common project manifests
+        find_and_print_files(clone_root, ["package.json", "pyproject.toml"])
+
+        # Always exit with 0 to not block Git operations
+        sys.exit(0)
+
+    except Exception as exc:
+        # Log error but don't fail the hook
+        app_logger.error("Error in launch-tools hook: %s", exc)
+        import traceback
+
+        traceback.print_exc()
+        sys.exit(0)  # Exit gracefully to not block Git operations

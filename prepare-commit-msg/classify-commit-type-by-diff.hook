@@ -1,37 +1,77 @@
-#!/bin/sh
-# Suggest or enforce commit type based on diff
-COMMIT_MSG_FILE=$1
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
+#!/usr/bin/env python3
+"""
+Hook: classify-commit-type-by-diff.hook
+Suggests a conventional commit type based on staged changes:
+- .md files only: docs:
+- All additions: feat:
+- All deletions: refactor:
+- Mixed add/del: refactor:
+"""
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
 
-# Only run for new commits, not merges or amends
-if [ "$2" = "merge" ] || [ "$2" = "commit" ]; then
-  exit 0
-fi
 
-FILES=$(git diff --cached --name-only)
-if [ -z "$FILES" ]; then
-  exit 0
-fi
+def get_staged_files():
+    result = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, check=True, encoding="utf-8", errors="replace")
+    return [f for f in result.stdout.strip().split("\n") if f]
 
-only_docs=true
-only_tests=true
-for file in $FILES; do
-  case $file in
-    *.md|docs/*)
-      only_tests=false
-      ;;
-    tests/*|*.test.*|*.spec.*)
-      only_docs=false
-      ;;
-    *)
-      only_docs=false
-      only_tests=false
-      ;;
-  esac
-done
 
-if $only_docs; then
-  sed -i '1s/^/docs: /' "$COMMIT_MSG_FILE"
-elif $only_tests; then
-  sed -i '1s/^/test: /' "$COMMIT_MSG_FILE"
-fi
+def get_diff_stats():
+    result = subprocess.run(["git", "diff", "--cached", "--numstat"], capture_output=True, check=True, encoding="utf-8", errors="replace")
+    stats = []
+    for line in result.stdout.strip().split("\n"):
+        if not line:
+            continue
+        parts = line.split("\t")
+        if len(parts) == 3:
+            added, deleted, filename = parts
+            stats.append((filename, added, deleted))
+    return stats
+
+
+def main():
+    commit_msg_file = sys.argv[1] if len(sys.argv) > 1 else None
+
+    # Early exit if no staged files
+    files = get_staged_files()
+    if not files:
+        sys.exit(0)
+
+    # Determine commit type based on file types and changes
+    exts = {Path(f).suffix for f in files}
+    if exts == {".md"}:
+        commit_type = "docs: "
+    else:
+        stats = get_diff_stats()
+        all_added = all(s[1] != "-" and s[2] == "0" for s in stats)
+        all_deleted = all(s[1] == "0" and s[2] != "-" for s in stats)
+        if all_added:
+            commit_type = "feat: "
+        elif all_deleted:
+            commit_type = "refactor: "
+        else:
+            commit_type = "refactor: "
+    # Prepend to commit message if not already present
+    if commit_msg_file and os.path.exists(commit_msg_file):
+        # Try utf-8 first (most robust for unicode/gitemoji), fallback to cp1252 only if needed
+        try:
+            with open(commit_msg_file, "r+", encoding="utf-8") as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            with open(commit_msg_file, "r+", encoding="cp1252") as f:
+                content = f.read()
+        # Check if message already has a conventional type (with optional scope and breaking change indicator)
+        # Pattern: type(scope)!: or type!: or type(scope): or type:
+        has_type = bool(re.match(r"^(feat|fix|docs|style|refactor|test|chore|ci)(?:\(.*?\))?(!)?:", content))
+        if not has_type:
+            with open(commit_msg_file, "w", encoding="utf-8") as f:
+                f.write(commit_type + content)
+    else:
+        print(commit_type.strip())
+
+
+if __name__ == "__main__":
+    main()

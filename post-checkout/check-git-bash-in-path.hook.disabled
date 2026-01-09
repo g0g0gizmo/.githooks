@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+"""
+add-git-bin-to-path.hook
+
+Post-checkout hook that validates Git Bash is available in the system PATH.
+Uses the githooks runtime detector for cross-platform bash detection.
+"""
+import sys
+from pathlib import Path
+
+# Add githooks package to Python path
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from githooks.core.output import print_error
+from githooks.core.runtime_detector import BashDetector
+
+
+def main():
+    """Validate that Git Bash is available in the system PATH."""
+    bash_path = BashDetector.detect()
+
+    if bash_path is None:
+        print_error(
+            "Git Bash (bash.exe) not found in system PATH. " "Please install Git for Windows and ensure its bin directory is in your PATH.", exit_code=1
+        )
+
+    # Optional: Uncomment for debugging
+    # print_success(f"Git Bash found at: {bash_path}")
+
+
+if __name__ == "__main__":
+    main()

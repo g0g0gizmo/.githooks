@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+"""
+commit-msg-smart-commit.hook (DISABLED)
+
+This hook is intended to validate and/or process Jira Smart Commits as described in:
+  .github/instructions/smart-commit.instructions.md
+
+- Supports detection of Smart Commit syntax (ISSUE-123 #command ...)
+- Can be used to enforce presence, validate format, or trigger actions
+- Not enabled by default: NOT included in dispatcher.hook or made executable
+- To enable: add to dispatcher.hook and set executable bit (chmod +x)
+
+See .github/instructions/smart-commit.instructions.md for full requirements and usage.
+"""
+
+import sys
+import re
+
+# Example: Detect Smart Commit pattern (does not enforce)
+SMART_COMMIT_PATTERN = re.compile(r"[A-Z]{2,}-\d+\s+#\w+")
+
+def main():
+    commit_msg_file = sys.argv[1]
+    with open(commit_msg_file, encoding="utf-8") as f:
+        msg = f.read()
+    if SMART_COMMIT_PATTERN.search(msg):
+        # Placeholder: print detected smart commit, do not block commit
+        print("[INFO] Smart Commit syntax detected (not enforced):", msg.strip().splitlines()[0])
+    # Always exit 0 (disabled)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+"""post-checkout hook to copy setup.ps1 to scripts/ if it doesn't exist."""
+
+import os
+import shutil
+from pathlib import Path
+
+# Get the directory of this script (post-checkout)
+script_dir = Path(__file__).parent
+# Go to repo root (parent of post-checkout)
+repo_root = script_dir.parent
+scripts_dir = repo_root / 'scripts'
+src_setup = script_dir / 'setup.ps1'
+dest_setup = scripts_dir / 'setup.ps1'
+
+if not scripts_dir.exists():
+    print("[post-checkout] 'scripts' folder not found. Creating and copying setup.ps1...")
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(src_setup, dest_setup)
+    print(f"[post-checkout] setup.ps1 copied to {scripts_dir}/")
+else:
+    print("[post-checkout] 'scripts' folder already exists. No action taken.")

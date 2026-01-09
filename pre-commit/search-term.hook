@@ -8,10 +8,17 @@
 # The hook should exit with non-zero status after issuing an appropriate
 # message if it stops the commit.
 #
-# Requirements: 
+# Requirements:
 #   * Bash
 #
 # To enable this hook, rename this file to "pre-commit".
+
+# Early exit if no staged files
+if ! git diff --cached --quiet 2>/dev/null; then
+	: # Has staged changes, continue
+else
+	exit 0
+fi
 
 # Redirect output to stderr
 exec 1>&2
@@ -26,7 +33,8 @@ SEARCH_TERM="FIXME:"
 # Check for the presence of the SEARCH_TERM in updated files
 if [[ $(git diff --cached | grep -E "^\+" | grep -v '+++ b/' | cut -c 2-) == *$SEARCH_TERM* ]]
 then
-	printf "${RED}Error:${NC} Found ${SEARCH_TERM} in attempted commit.\n"
-	printf "Please remove all occurances of ${SEARCH_TERM} before committing.\n"
-	exit 1
+	printf "${RED}WARNING:${NC} Found ${SEARCH_TERM} in attempted commit.\n"
+	printf "Please consider removing all occurrences of ${SEARCH_TERM} before committing.\n"
 fi
+
+exit 0

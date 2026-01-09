@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""
+Generate GitHub Copilot instructions from JIRA feature template.
+
+This script parses a filled-out JIRA feature template and generates
+structured Copilot instructions in Markdown format for AI-assisted
+development planning and implementation.
+
+Usage:
+    python jira_feature_instructions.py [template_file] [output_file]
+    python jira_feature_instructions.py  # Uses defaults: jira-feature-template.md -> feature-instructions.md
+"""
+
+import re
+import sys
+from pathlib import Path
+from typing import Dict, Optional
+
+
+def parse_template(template_path: Path) -> Dict[str, str]:
+    """Parse JIRA feature template and extract structured fields.
+
+    Args:
+        template_path: Path to the template markdown file
+
+    Returns:
+        Dictionary with keys: description, steps_to_reproduce, requirements,
+        unit_tests, documentation
+    """
+    if not template_path.exists():
+        print(f"[ERROR] Template file not found: {template_path}", file=sys.stderr)
+        sys.exit(1)
+
+    content = template_path.read_text(encoding="utf-8")
+
+    # Define extraction patterns for each section
+    patterns = {
+        "description": r"1\)\s*Description:\*\s*\(.*?\)\s*\n\n(.*?)(?=\n\n2\)|$)",
+        "steps_to_reproduce": r"2\)\s*Steps to Reproduce.*?:\*\s*\(.*?\)\s*\n\n(.*?)(?=\n\n3\)|$)",
+        "requirements": r"3\)\s*Requirements\s*/\s*Acceptance Criteria:\*\s*\(.*?\)\s*\n\n(.*?)(?=\n\n4\)|$)",
+        "unit_tests": r"4\)\s*Unit Tests:\*\s*\(.*?\)\s*\n\n(.*?)(?=\n\n5\)|$)",
+        "documentation": r"5\)\s*Documentation:\*\s*\(.*?\)\s*\n\n(.*?)(?=$)",
+    }
+
+    extracted = {}
+    for key, pattern in patterns.items():
+        match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+        if match:
+            extracted[key] = match.group(1).strip()
+        else:
+            extracted[key] = ""
+
+    return extracted
+
+
+def generate_instructions(data: Dict[str, str], output_path: Path) -> None:
+    """Generate Copilot instructions from parsed template data.
+
+    Args:
+        data: Parsed template data dictionary
+        output_path: Path where instructions will be written
+    """
+    instructions = f"""# Feature Implementation Instructions
+
+## Overview
+
+{data['description']}
+
+## Acceptance Criteria
+
+{data['requirements']}
+
+## Implementation Steps
+
+**Note**: Follow the project's coding conventions as defined in `.github/instructions/python.instructions.md`
+
+### 1. Analysis Phase
+
+- Review existing codebase for similar implementations
+- Identify affected modules and dependencies
+- Document design decisions and tradeoffs
+
+### 2. Implementation Phase
+
+- Create necessary files and functions
+- Follow project structure conventions
+- Use type hints and docstrings (PEP 257)
+- Format code with Black (line length 155) and isort
+
+### 3. Testing Phase
+
+**Unit Tests Required:**
+
+{data['unit_tests'] if data['unit_tests'].lower() != 'none' else 'None - Integration testing only'}
+
+**Test Coverage:**
+
+- Minimum 80% coverage required (see `pyproject.toml`)
+- Use `temp_git_repo` fixture for Git operations
+- NO mocking or monkeypatching - use real operations
+- Include module and function docstrings in tests
+
+**Test Command:**
+
+```powershell
+pytest tests/ -v --cov=. --cov-report=term-missing
+```
+
+### 4. Documentation Phase
+
+**Documentation Updates:**
+
+{data['documentation'] if data['documentation'].lower() != 'none' else 'None - Code comments and docstrings sufficient'}
+
+## Known Issues / Context
+
+{data['steps_to_reproduce'] if data['steps_to_reproduce'].lower() != 'n/a' else 'No known issues - new feature implementation'}
+
+## Code Quality Checklist
+
+Before submitting:
+
+- [ ] Code follows Black formatting (155 chars, Python 3.9+)
+- [ ] Imports organized with isort (profile: black)
+- [ ] Type hints on all functions
+- [ ] Docstrings follow PEP 257 (params, returns, examples)
+- [ ] Tests written with module + function docstrings
+- [ ] Coverage ≥ 80% for new code
+- [ ] All tests passing locally
+- [ ] No linting errors (flake8, pylint)
+- [ ] Git commit follows conventional commit format
+
+## Commit Message Format
+
+```text
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:** `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `ci:`
+
+**Example:**
+
+```text
+feat(hooks): Add noise figure test sweep functionality
+
+- Implement parameter sweeping similar to PowerSweep/GainSweep
+- Add data collection with configurable ranges
+- Include validation for edge cases
+
+Closes JIRA-TICKET
+```
+
+## References
+
+- Python Conventions: `.github/instructions/python.instructions.md`
+- Testing Guidelines: `.github/instructions/pytest.instructions.md`
+- PR Guidelines: `.github/instructions/pull-request.instructions.md`
+- Commit Guidelines: `docs/COMMITS.md`
+
+---
+
+**Generated from:** `jira-feature-template.md`
+**Generated by:** `jira_feature_instructions.py`
+"""
+
+    output_path.write_text(instructions, encoding="utf-8")
+    print(f"[OK] Instructions generated: {output_path}")
+    print(f"[INFO] Use this file as context for GitHub Copilot or AI assistants")
+
+
+def main() -> None:
+    """Main entry point for instruction generator."""
+    # Parse command-line arguments
+    if len(sys.argv) > 3:
+        print(f"Usage: {sys.argv[0]} [template_file] [output_file]", file=sys.stderr)
+        sys.exit(1)
+
+    template_file = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("jira-feature-template.md")
+    output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("feature-instructions.md")
+
+    print(f"[INFO] Parsing template: {template_file}")
+
+    # Parse and validate
+    data = parse_template(template_file)
+
+    # Check for empty required fields
+    empty_fields = [k for k, v in data.items() if not v and k != "steps_to_reproduce"]
+    if empty_fields:
+        print(f"[WARNING] Some fields are empty: {', '.join(empty_fields)}", file=sys.stderr)
+
+    # Generate output
+    print(f"[INFO] Generating instructions: {output_file}")
+    generate_instructions(data, output_file)
+
+
+if __name__ == "__main__":
+    main()

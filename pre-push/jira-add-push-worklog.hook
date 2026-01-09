@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""
+Git pre-push hook to log work and transition Jira tickets to 'Under Review'.
+Automatically tracks work when pushing code for review.
+"""
+import os
+import re
+import subprocess
+import sys
+from typing import Optional, Tuple
+
+# Configuration
+BRANCH_REGEX = r"([A-Z]+-\d+)"
+SERVICE_NAME = "gojira"
+DEFAULT_TIME_SPENT = "2m"
+DEFAULT_SERVER = os.getenv("JIRA_SERVER", "https://jira.viasat.com")
+REQUIRED_DEPENDENCIES = {"jira": "jira", "keyring": "keyring", "typer": "typer"}
+
+
+def ensure_dependencies():
+    """Ensure required dependencies are installed."""
+    missing = []
+
+    for module, package in REQUIRED_DEPENDENCIES.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+
+    if missing:
+        print(f"[INFO] Installing missing dependencies: {', '.join(missing)}")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet"] + missing)
+            print("[OK] Dependencies installed successfully")
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] Failed to install dependencies: {e}", file=sys.stderr)
+            sys.exit(1)
+
+
+# Ensure dependencies before importing
+ensure_dependencies()
+
+import keyring
+
+# Import third-party dependencies after ensuring they're installed
+# pylint: disable=wrong-import-position
+import typer
+from jira import JIRA
+
+
+def parse_ticket_from_branch(branch: str) -> Optional[str]:
+    """
+    Extract Jira ticket ID from branch name.
+
+    Args:
+        branch: Git branch name (e.g., 'feature/PROJ-123-add-feature')
+
+    Returns:
+        Ticket ID (e.g., 'PROJ-123') or None if not found
+    """
+    match = re.search(BRANCH_REGEX, branch)
+    return match.group(1) if match else None
+
+
+def get_current_branch() -> Optional[str]:
+    """Get the current Git branch name."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
+
+def get_jira_client() -> Optional[JIRA]:
+    """Create and authenticate a Jira client."""
+    try:
+        username = os.environ.get("JIRA_USERNAME") or os.environ.get("GOJIRA_USERNAME")
+        password = os.environ.get("JIRA_TOKEN") or os.environ.get("GOJIRA_SECRET")
+
+        if not username:
+            username = keyring.get_password(f"{SERVICE_NAME}.jira.username", "username")
+        if not password:
+            password = keyring.get_password(f"{SERVICE_NAME}.jira.password", "password")
+
+        if not username:
+            username = input("Enter your Jira username/email: ")
+            keyring.set_password(f"{SERVICE_NAME}.jira.username", "username", username)
+        if not password:
+            keyring.set_password(
+                f"{SERVICE_NAME}.jira.password",
+                "password",
+                typer.prompt("Enter Jira password: ", hide_input=True)
+            )
+
+        return JIRA(server=DEFAULT_SERVER, basic_auth=(username, password))
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f"[ERROR] Failed to create Jira client: {e}", file=sys.stderr)
+        return None
+
+
+def transition_to_review(jira: JIRA, ticket: str, branch_name: str,
+                         time_spent: str = DEFAULT_TIME_SPENT) -> Tuple[bool, Optional[str]]:
+    """Transition ticket to 'Under Review' and log work."""
+    try:
+        comment = f"Pushed code from {branch_name} for review"
+        issue = jira.issue(ticket)
+
+        # Add worklog first
+        jira.add_worklog(issue, timeSpent=time_spent, comment=comment)
+
+        # Transition to "Under Review"
+        transitions = jira.transitions(issue)
+        under_review = next(
+            (t for t in transitions if 'review' in t['name'].lower()),
+            None
+        )
+
+        if under_review:
+            jira.transition_issue(issue, under_review['id'])
+        else:
+            # Try alternative transition names
+            for transition in transitions:
+                if any(keyword in transition['name'].lower()
+                      for keyword in ['code review', 'peer review', 'reviewing']):
+                    jira.transition_issue(issue, transition['id'])
+                    break
+
+        return True, None
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        return False, f"Failed to transition/log work: {e}"
+
+
+def main():
+    """Main entry point for pre-push hook."""
+    # Get current branch
+    branch = get_current_branch()
+    if not branch:
+        print("[ERROR] Failed to get current branch", file=sys.stderr)
+        sys.exit(0)  # Don't block push on error
+
+    # Parse ticket from branch name
+    ticket = parse_ticket_from_branch(branch)
+    if not ticket:
+        sys.exit(0)  # No ticket in branch name, skip
+
+    # Create Jira client and process ticket
+    jira_client = get_jira_client()
+    if not jira_client:
+        print("[ERROR] Failed to create Jira client", file=sys.stderr)
+        sys.exit(0)  # Don't block push on error
+
+    success, error = transition_to_review(jira_client, ticket, branch)
+
+    if success:
+        print(f"[OK] {ticket}: Transitioned to 'Under Review' and logged {DEFAULT_TIME_SPENT} work")
+        sys.exit(0)
+    else:
+        print(f"[WARNING] {ticket}: {error}", file=sys.stderr)
+        sys.exit(0)  # Don't block push on Jira errors
+
+
+if __name__ == "__main__":
+    main()

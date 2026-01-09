@@ -1,8 +1,8 @@
-## prepare-commit-msg 
+## prepare-commit-msg
 
 Called after receiving the default commit message, just prior to firing up the commit message editor. A non-zero exit aborts the commit. This is used to edit the message in a way that cannot be suppressed.
 
-## invoked by 
+## invoked by
 
 ```bash
 git commit

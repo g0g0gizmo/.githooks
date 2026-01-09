@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""
+git-go: Dispatcher for command modules (start, finish, publish, status)
+
+This script is intentionally small: it parses args and delegates to
+`githooks.cli` modules where the command implementations live.
+"""
+import argparse
+import importlib
+import sys
+
+from githooks.core.utils import ensure_dependencies
+
+
+def main():
+    ensure_dependencies()
+
+    parser = argparse.ArgumentParser(description="git-go: JIRA-integrated Git workflow automation")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    parser_start = subparsers.add_parser("start", help="Start work on a JIRA ticket")
+    parser_start.add_argument("repo_alias")
+    parser_start.add_argument("jira_ticket")
+
+    parser_finish = subparsers.add_parser("finish", help="Create pull request and transition JIRA to review")
+    parser_finish.add_argument("repo_alias")
+    parser_finish.add_argument("jira_ticket")
+
+    parser_publish = subparsers.add_parser("publish", help="Merge PR, cleanup branches, and mark JIRA as done")
+    parser_publish.add_argument("repo_alias")
+
+    parser_status = subparsers.add_parser("status", help="Display current workflow status")
+    parser_status.add_argument("repo_alias")
+
+    # commitmint command
+    parser_commitmint = subparsers.add_parser(
+        "commitmint",
+        help="Interactively correct the latest commit message for a Jira ticket",
+    )
+    parser_commitmint.add_argument("repo_alias")
+    parser_commitmint.add_argument("jira_ticket")
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    # Support commitmint command
+    if args.command == "commitmint":
+        from githooks.cli import commitmint
+
+        commitmint.main(args.repo_alias, args.jira_ticket)
+        return
+
+    try:
+        module = importlib.import_module(f"githooks.cli.{args.command}")
+    except ImportError as exc:
+        print(f"[ERROR] Could not load command module '{args.command}': {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if not hasattr(module, "main"):
+        print(f"[ERROR] Command module '{args.command}' has no entrypoint 'main'", file=sys.stderr)
+        sys.exit(1)
+
+    module.main(args)
+
+
+if __name__ == "__main__":
+    main()
